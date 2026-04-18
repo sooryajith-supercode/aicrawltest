@@ -3,17 +3,17 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2",
+  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]",
-        secondary: "border-transparent bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))]",
-        destructive: "border-transparent bg-[hsl(var(--destructive))] text-[hsl(var(--destructive-foreground))]",
-        outline: "text-[hsl(var(--foreground))]",
-        success: "border-transparent bg-green-100 text-green-800",
-        warning: "border-transparent bg-yellow-100 text-yellow-800",
-        error: "border-transparent bg-red-100 text-red-800",
+        default: "bg-[#c96442] text-[#faf9f5]",
+        secondary: "bg-[#e8e6dc] text-[#4d4c48]",
+        destructive: "bg-[#b53333]/10 text-[#b53333]",
+        outline: "border border-[#e8e6dc] text-[#5e5d59]",
+        success: "bg-[#3a7c52]/10 text-[#3a7c52]",
+        warning: "bg-[#8a6a1a]/10 text-[#8a6a1a]",
+        error: "bg-[#b53333]/10 text-[#b53333]",
       },
     },
     defaultVariants: {
