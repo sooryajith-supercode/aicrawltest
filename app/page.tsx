@@ -78,7 +78,7 @@ export default function Home() {
           AI Crawlability Test
         </span>
         <span className="text-xs" style={{ color: "#87867f" }}>
-          Live checks + synthetic data
+          v{process.env.NEXT_PUBLIC_APP_VERSION} · Live checks + synthetic data
         </span>
       </header>
 
