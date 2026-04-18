@@ -29,6 +29,17 @@ function statusIcon(status: CheckStatus) {
   }
 }
 
+function liveBadge() {
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider"
+      style={{ backgroundColor: "rgba(58,124,82,0.10)", color: "#3a7c52" }}
+    >
+      Live
+    </span>
+  )
+}
+
 function statusPill(status: CheckStatus) {
   const map: Record<CheckStatus, { bg: string; text: string; label: string }> = {
     pass:    { bg: "rgba(58,124,82,0.10)",  text: "#3a7c52", label: "Pass"    },
@@ -93,6 +104,7 @@ function CheckRow({ check }: { check: CheckResult }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center flex-wrap gap-2 mb-0.5">
             <span className="text-sm font-medium" style={{ color: "#141413" }}>{check.name}</span>
+            {check.isReal && liveBadge()}
             <span className="flex items-center gap-1 text-xs" style={{ color: "#87867f" }}>
               {categoryIcon(check.category)}
               {check.category}

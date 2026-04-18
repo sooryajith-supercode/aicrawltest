@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CrawlResults } from "@/components/CrawlResults"
 import { generateCrawlReport } from "@/lib/crawl-data"
-import type { CrawlReport } from "@/lib/crawl-data"
+import type { CrawlReport, CheckResult } from "@/lib/crawl-data"
 import { Search, Loader2 } from "lucide-react"
 
 const FEATURES = [
-  { icon: "📄", title: "llms.txt", desc: "Checks for the emerging AI-readable site manifest that tells LLMs how to interact with the site." },
+  { icon: "📄", title: "llms.txt", desc: "Checks for the emerging AI-readable site manifest that tells LLMs how to interact with the site.", live: true },
   { icon: "🤖", title: "Robots & Sitemaps", desc: "Verifies AI crawlers are explicitly allowed and all content is systematically discoverable." },
   { icon: "🔍", title: "Structured Data", desc: "Looks for JSON-LD schemas that help AI understand the meaning and context of your content." },
   { icon: "📚", title: "Knowledge Hub", desc: "Detects dedicated documentation or help sections that AI can index for accurate answers." },
@@ -21,6 +21,7 @@ export default function Home() {
   const [url, setUrl] = useState("")
   const [report, setReport] = useState<CrawlReport | null>(null)
   const [loading, setLoading] = useState(false)
+  const [loadingStep, setLoadingStep] = useState("")
   const [error, setError] = useState("")
 
   function isValidUrl(value: string) {
@@ -37,16 +38,31 @@ export default function Home() {
     const trimmed = url.trim()
     if (!trimmed) { setError("Please enter a URL"); return }
     if (!isValidUrl(trimmed)) { setError("Please enter a valid URL"); return }
+
     setError("")
     setLoading(true)
     setReport(null)
-    await new Promise((r) => setTimeout(r, 1800))
+
     const normalized = trimmed.startsWith("http") ? trimmed : `https://${trimmed}`
-    setReport(generateCrawlReport(normalized))
-    setLoading(false)
+
+    try {
+      // Fetch real llms.txt check from the server-side API
+      setLoadingStep("Checking llms.txt…")
+      const llmsRes = await fetch(`/api/check-llms?url=${encodeURIComponent(normalized)}`)
+      const llmsResult: Partial<CheckResult> = llmsRes.ok ? await llmsRes.json() : {}
+
+      setLoadingStep("Generating report…")
+      const result = generateCrawlReport(normalized, { "llms-txt": llmsResult })
+      setReport(result)
+    } catch {
+      setError("Something went wrong. Please try again.")
+    } finally {
+      setLoading(false)
+      setLoadingStep("")
+    }
   }
 
-  const examples = ["openai.com", "github.com", "example.com"]
+  const examples = ["anthropic.com", "openai.com", "github.com", "example.com"]
 
   return (
     <div style={{ backgroundColor: "#f5f4ed", minHeight: "100vh" }}>
@@ -62,32 +78,33 @@ export default function Home() {
           AI Crawlability Test
         </span>
         <span className="text-xs" style={{ color: "#87867f" }}>
-          Synthetic demo data
+          Live checks + synthetic data
         </span>
       </header>
 
       {/* Hero */}
       <section className="max-w-2xl mx-auto px-6 pt-20 pb-12 text-center">
         <p
-          className="text-xs font-medium tracking-[0.5px] uppercase mb-6"
+          className="text-xs font-medium uppercase mb-6"
           style={{ color: "#87867f", letterSpacing: "0.5px" }}
         >
           Free Tool
         </p>
         <h1
-          className="mb-5 leading-[1.10]"
+          className="mb-5"
           style={{
             fontFamily: 'Georgia, "Times New Roman", serif',
             fontWeight: 500,
             fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
             color: "#141413",
+            lineHeight: 1.1,
             letterSpacing: "-0.01em",
           }}
         >
           Is your site ready for AI?
         </h1>
         <p
-          className="text-lg leading-relaxed mb-10 max-w-lg mx-auto"
+          className="text-lg max-w-lg mx-auto mb-10"
           style={{ color: "#5e5d59", lineHeight: 1.6 }}
         >
           Check how well your website can be discovered, indexed, and understood
@@ -96,32 +113,27 @@ export default function Home() {
 
         {/* Search form */}
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto mb-4">
-          <div className="relative flex-1">
-            <Input
-              type="text"
-              placeholder="yourwebsite.com"
-              value={url}
-              onChange={(e) => { setUrl(e.target.value); setError("") }}
-              className="w-full h-12 text-base pl-4 pr-4"
-              disabled={loading}
-              style={{ fontSize: "1rem" }}
-            />
-          </div>
+          <Input
+            type="text"
+            placeholder="yourwebsite.com"
+            value={url}
+            onChange={(e) => { setUrl(e.target.value); setError("") }}
+            className="flex-1 h-12 text-base"
+            disabled={loading}
+          />
           <Button type="submit" disabled={loading} size="lg" className="h-12 shrink-0">
             {loading
-              ? <><Loader2 className="h-4 w-4 animate-spin" />Scanning…</>
+              ? <><Loader2 className="h-4 w-4 animate-spin" />{loadingStep || "Scanning…"}</>
               : <><Search className="h-4 w-4" />Run Test</>
             }
           </Button>
         </form>
 
-        {error && (
-          <p className="text-sm mb-3" style={{ color: "#b53333" }}>{error}</p>
-        )}
+        {error && <p className="text-sm mb-3" style={{ color: "#b53333" }}>{error}</p>}
 
         {/* Example links */}
         <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center">
-          <span className="text-sm" style={{ color: "#87867f" }}>Try an example:</span>
+          <span className="text-sm" style={{ color: "#87867f" }}>Try:</span>
           {examples.map((ex) => (
             <button
               key={ex}
@@ -142,9 +154,9 @@ export default function Home() {
       {loading && (
         <section className="max-w-2xl mx-auto px-6 pb-16 text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: "#c96442" }} />
-          <p className="font-medium" style={{ color: "#141413" }}>Scanning website for AI compatibility…</p>
+          <p className="font-medium" style={{ color: "#141413" }}>{loadingStep || "Scanning…"}</p>
           <p className="text-sm mt-1" style={{ color: "#87867f" }}>
-            Checking llms.txt, robots.txt, sitemaps, structured data and more
+            Fetching real data from your site and running all checks
           </p>
         </section>
       )}
@@ -159,7 +171,6 @@ export default function Home() {
       {/* Feature grid — only when no results */}
       {!loading && !report && (
         <>
-          {/* Light section — what we check */}
           <section className="max-w-2xl mx-auto px-6 pb-20">
             <h2
               className="text-center mb-8"
@@ -184,14 +195,24 @@ export default function Home() {
                     boxShadow: "rgba(0,0,0,0.04) 0px 4px 24px",
                   }}
                 >
-                  <div className="text-xl mb-2">{item.icon}</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">{item.icon}</span>
+                    {item.live && (
+                      <span
+                        className="text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                        style={{ backgroundColor: "rgba(58,124,82,0.1)", color: "#3a7c52" }}
+                      >
+                        Live
+                      </span>
+                    )}
+                  </div>
                   <div
                     className="font-medium mb-1"
                     style={{ fontFamily: 'Georgia, serif', fontWeight: 500, fontSize: "1rem", color: "#141413" }}
                   >
                     {item.title}
                   </div>
-                  <div className="text-sm leading-relaxed" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
+                  <div className="text-sm" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
                     {item.desc}
                   </div>
                 </div>
@@ -199,27 +220,22 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Dark section — why it matters */}
-          <section
-            className="py-20 px-6"
-            style={{ backgroundColor: "#141413" }}
-          >
+          {/* Dark section */}
+          <section className="py-20 px-6" style={{ backgroundColor: "#141413" }}>
             <div className="max-w-2xl mx-auto text-center">
               <h2
-                className="mb-5 leading-[1.20]"
+                className="mb-5"
                 style={{
                   fontFamily: 'Georgia, serif',
                   fontWeight: 500,
                   fontSize: "clamp(1.5rem, 3vw, 2.25rem)",
                   color: "#faf9f5",
+                  lineHeight: 1.2,
                 }}
               >
                 AI is the new search
               </h2>
-              <p
-                className="text-base leading-relaxed max-w-lg mx-auto"
-                style={{ color: "#b0aea5", lineHeight: 1.6 }}
-              >
+              <p className="text-base max-w-lg mx-auto" style={{ color: "#b0aea5", lineHeight: 1.6 }}>
                 ChatGPT, Claude, Perplexity, and AI-powered browsers are rapidly replacing
                 traditional search as the way people find information. If your website isn't
                 structured for AI crawlers, you risk becoming invisible — even if you rank
@@ -236,7 +252,7 @@ export default function Home() {
         style={{ borderTop: "1px solid #f0eee6", backgroundColor: "#f5f4ed" }}
       >
         <p className="text-xs" style={{ color: "#87867f" }}>
-          Results are based on synthetic demonstration data for illustration purposes only.
+          llms.txt is checked live. All other checks use synthetic demonstration data.
         </p>
       </footer>
     </div>
