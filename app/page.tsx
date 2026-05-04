@@ -124,7 +124,10 @@ export default function Home() {
           <Button type="submit" disabled={loading} size="lg" className="h-12 shrink-0">
             {loading
               ? <><Loader2 className="h-4 w-4 animate-spin" />{loadingStep || "Scanning…"}</>
-              : <><Search className="h-4 w-4" />Run Test</>
+              : <><Search className="h-4 w-4" />
+              {/* Run Test */}
+              Get result
+              </>
             }
           </Button>
         </form>
