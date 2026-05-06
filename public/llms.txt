@@ -1,0 +1,7 @@
+# AI Crawlability Test
+
+> Free tool to check whether your website has the key files AI crawlers and agents look for — llms.txt, robots.txt, and sitemap.xml.
+
+## Pages
+
+- [Home](/index.md): Check your site's AI crawlability — enter a URL and instantly see whether llms.txt, robots.txt, and sitemap.xml are present and properly configured.

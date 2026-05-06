@@ -3,25 +3,177 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { CrawlResults } from "@/components/CrawlResults"
-import { generateCrawlReport } from "@/lib/crawl-data"
-import type { CrawlReport, CheckResult } from "@/lib/crawl-data"
-import { Search, Loader2 } from "lucide-react"
+import { Search, Loader2, CheckCircle2, XCircle } from "lucide-react"
+
+interface FileCheckResult {
+  found: boolean
+  url: string
+}
+
+interface RobotsDirectives {
+  userAgentStar: boolean
+  hasDisallow: boolean
+  hasAllow: boolean
+  hasSitemap: boolean
+}
+
+interface RobotsTxtResult extends FileCheckResult {
+  directives: RobotsDirectives | null
+}
+
+interface CheckFilesResponse {
+  llmsTxt: FileCheckResult
+  robotsTxt: RobotsTxtResult
+  sitemapXml: FileCheckResult
+}
 
 const FEATURES = [
   { icon: "📄", title: "llms.txt", desc: "Checks for the emerging AI-readable site manifest that tells LLMs how to interact with the site.", live: true },
-  { icon: "🤖", title: "Robots & Sitemaps", desc: "Verifies AI crawlers are explicitly allowed and all content is systematically discoverable." },
-  { icon: "🔍", title: "Structured Data", desc: "Looks for JSON-LD schemas that help AI understand the meaning and context of your content." },
-  { icon: "📚", title: "Knowledge Hub", desc: "Detects dedicated documentation or help sections that AI can index for accurate answers." },
-  { icon: "🔓", title: "Open Access", desc: "Ensures key content is reachable without authentication so crawlers aren't blocked." },
-  { icon: "🏷️", title: "Rich Metadata", desc: "Checks Open Graph and meta description tags that AI uses to summarise pages." },
+  { icon: "🤖", title: "Robots.txt", desc: "Verifies robots.txt exists so AI crawlers know how to interact with the site.", live: true },
+  { icon: "🗺️", title: "Sitemap.xml", desc: "Checks for a sitemap across common paths and via any Sitemap: directives declared in robots.txt.", live: true },
 ]
+
+function ResultCard({ label, icon, result }: { label: string; icon: string; result: FileCheckResult }) {
+  return (
+    <div
+      className="rounded-[8px] p-5 flex items-start gap-4"
+      style={{
+        backgroundColor: "#faf9f5",
+        border: `1px solid ${result.found ? "rgba(58,124,82,0.25)" : "rgba(181,51,51,0.25)"}`,
+        boxShadow: "rgba(0,0,0,0.04) 0px 4px 24px",
+      }}
+    >
+      <span className="text-2xl mt-0.5">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span
+            className="font-medium"
+            style={{ fontFamily: "Georgia, serif", fontSize: "1rem", color: "#141413" }}
+          >
+            {label}
+          </span>
+          {result.found ? (
+            <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#3a7c52" }} />
+          ) : (
+            <XCircle className="h-4 w-4 shrink-0" style={{ color: "#b53333" }} />
+          )}
+        </div>
+        <p className="text-sm break-all" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
+          {result.found ? (
+            <>
+              <span style={{ color: "#3a7c52", fontWeight: 500 }}>Found</span> at{" "}
+              <a
+                href={result.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+                style={{ color: "#c96442" }}
+              >
+                {result.url}
+              </a>
+            </>
+          ) : (
+            <>
+              <span style={{ color: "#b53333", fontWeight: 500 }}>Not found</span> — checked{" "}
+              <span style={{ color: "#87867f" }}>{result.url}</span>
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function DirectiveRow({ label, present }: { label: string; present: boolean }) {
+  return (
+    <div className="flex items-center gap-2">
+      {present ? (
+        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: "#3a7c52" }} />
+      ) : (
+        <XCircle className="h-3.5 w-3.5 shrink-0" style={{ color: "#b53333" }} />
+      )}
+      <code
+        className="text-xs"
+        style={{ color: present ? "#3a7c52" : "#b53333", fontWeight: present ? 500 : 400 }}
+      >
+        {label}
+      </code>
+      {!present && (
+        <span className="text-xs" style={{ color: "#87867f" }}>missing</span>
+      )}
+    </div>
+  )
+}
+
+function RobotsCard({ result }: { result: RobotsTxtResult }) {
+  return (
+    <div
+      className="rounded-[8px] p-5 flex items-start gap-4"
+      style={{
+        backgroundColor: "#faf9f5",
+        border: `1px solid ${result.found ? "rgba(58,124,82,0.25)" : "rgba(181,51,51,0.25)"}`,
+        boxShadow: "rgba(0,0,0,0.04) 0px 4px 24px",
+      }}
+    >
+      <span className="text-2xl mt-0.5">🤖</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span
+            className="font-medium"
+            style={{ fontFamily: "Georgia, serif", fontSize: "1rem", color: "#141413" }}
+          >
+            robots.txt
+          </span>
+          {result.found ? (
+            <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#3a7c52" }} />
+          ) : (
+            <XCircle className="h-4 w-4 shrink-0" style={{ color: "#b53333" }} />
+          )}
+        </div>
+        <p className="text-sm break-all mb-3" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
+          {result.found ? (
+            <>
+              <span style={{ color: "#3a7c52", fontWeight: 500 }}>Found</span> at{" "}
+              <a
+                href={result.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+                style={{ color: "#c96442" }}
+              >
+                {result.url}
+              </a>
+            </>
+          ) : (
+            <>
+              <span style={{ color: "#b53333", fontWeight: 500 }}>Not found</span> — checked{" "}
+              <span style={{ color: "#87867f" }}>{result.url}</span>
+            </>
+          )}
+        </p>
+        {result.found && result.directives && (
+          <div
+            className="rounded-[6px] p-3 flex flex-col gap-1.5"
+            style={{ backgroundColor: "#f0eee6", border: "1px solid #e8e5da" }}
+          >
+            <p className="text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: "#87867f" }}>
+              Directives
+            </p>
+            <DirectiveRow label="User-agent: *" present={result.directives.userAgentStar} />
+            <DirectiveRow label="Disallow:" present={result.directives.hasDisallow} />
+            <DirectiveRow label="Allow:" present={result.directives.hasAllow} />
+            <DirectiveRow label="Sitemap:" present={result.directives.hasSitemap} />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function Home() {
   const [url, setUrl] = useState("")
-  const [report, setReport] = useState<CrawlReport | null>(null)
+  const [results, setResults] = useState<CheckFilesResponse | null>(null)
   const [loading, setLoading] = useState(false)
-  const [loadingStep, setLoadingStep] = useState("")
   const [error, setError] = useState("")
 
   function isValidUrl(value: string) {
@@ -33,7 +185,7 @@ export default function Home() {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const trimmed = url.trim()
     if (!trimmed) { setError("Please enter a URL"); return }
@@ -41,24 +193,19 @@ export default function Home() {
 
     setError("")
     setLoading(true)
-    setReport(null)
+    setResults(null)
 
     const normalized = trimmed.startsWith("http") ? trimmed : `https://${trimmed}`
 
     try {
-      // Fetch real llms.txt check from the server-side API
-      setLoadingStep("Checking llms.txt…")
-      const llmsRes = await fetch(`/api/check-llms?url=${encodeURIComponent(normalized)}`)
-      const llmsResult: Partial<CheckResult> = llmsRes.ok ? await llmsRes.json() : {}
-
-      setLoadingStep("Generating report…")
-      const result = generateCrawlReport(normalized, { "llms-txt": llmsResult })
-      setReport(result)
+      const res = await fetch(`/api/check-files?url=${encodeURIComponent(normalized)}`)
+      if (!res.ok) throw new Error("API error")
+      const data: CheckFilesResponse = await res.json()
+      setResults(data)
     } catch {
       setError("Something went wrong. Please try again.")
     } finally {
       setLoading(false)
-      setLoadingStep("")
     }
   }
 
@@ -73,12 +220,12 @@ export default function Home() {
       >
         <span
           className="text-base font-medium tracking-tight"
-          style={{ fontFamily: 'Georgia, serif', color: "#141413", fontWeight: 500 }}
+          style={{ fontFamily: "Georgia, serif", color: "#141413", fontWeight: 500 }}
         >
           AI Crawlability Test
         </span>
         <span className="text-xs" style={{ color: "#87867f" }}>
-          v{process.env.NEXT_PUBLIC_APP_VERSION} · Live checks + synthetic data
+          v{process.env.NEXT_PUBLIC_APP_VERSION} · Live checks
         </span>
       </header>
 
@@ -107,8 +254,7 @@ export default function Home() {
           className="text-lg max-w-lg mx-auto mb-10"
           style={{ color: "#5e5d59", lineHeight: 1.6 }}
         >
-          Check how well your website can be discovered, indexed, and understood
-          by AI agents, crawlers, and the new generation of AI-powered search.
+          Check whether your website has the key files AI crawlers and agents look for.
         </p>
 
         {/* Search form */}
@@ -123,11 +269,8 @@ export default function Home() {
           />
           <Button type="submit" disabled={loading} size="lg" className="h-12 shrink-0">
             {loading
-              ? <><Loader2 className="h-4 w-4 animate-spin" />{loadingStep || "Scanning…"}</>
-              : <><Search className="h-4 w-4" />
-              {/* Run Test */}
-              Get result
-              </>
+              ? <><Loader2 className="h-4 w-4 animate-spin" />Checking…</>
+              : <><Search className="h-4 w-4" />Check site</>
             }
           </Button>
         </form>
@@ -141,7 +284,7 @@ export default function Home() {
             <button
               key={ex}
               type="button"
-              onClick={() => { setUrl(ex); setError(""); setReport(null) }}
+              onClick={() => { setUrl(ex); setError(""); setResults(null) }}
               className="text-sm underline underline-offset-2 transition-colors"
               style={{ color: "#c96442" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#a0502f")}
@@ -157,28 +300,36 @@ export default function Home() {
       {loading && (
         <section className="max-w-2xl mx-auto px-6 pb-16 text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: "#c96442" }} />
-          <p className="font-medium" style={{ color: "#141413" }}>{loadingStep || "Scanning…"}</p>
+          <p className="font-medium" style={{ color: "#141413" }}>Checking files…</p>
           <p className="text-sm mt-1" style={{ color: "#87867f" }}>
-            Fetching real data from your site and running all checks
+            Looking up llms.txt, robots.txt, and sitemap.xml on your site
           </p>
         </section>
       )}
 
       {/* Results */}
-      {!loading && report && (
-        <section className="max-w-2xl mx-auto px-6 pb-20">
-          <CrawlResults report={report} />
+      {!loading && results && (
+        <section className="max-w-2xl mx-auto px-6 pb-20 space-y-4">
+          <p
+            className="text-xs font-medium uppercase mb-2"
+            style={{ color: "#87867f", letterSpacing: "0.5px" }}
+          >
+            Results for {url.replace(/^https?:\/\//, "")}
+          </p>
+          <ResultCard label="llms.txt" icon="📄" result={results.llmsTxt} />
+          <RobotsCard result={results.robotsTxt} />
+          <ResultCard label="sitemap.xml" icon="🗺️" result={results.sitemapXml} />
         </section>
       )}
 
       {/* Feature grid — only when no results */}
-      {!loading && !report && (
+      {!loading && !results && (
         <>
           <section className="max-w-2xl mx-auto px-6 pb-20">
             <h2
               className="text-center mb-8"
               style={{
-                fontFamily: 'Georgia, serif',
+                fontFamily: "Georgia, serif",
                 fontWeight: 500,
                 fontSize: "1.3rem",
                 color: "#141413",
@@ -211,7 +362,7 @@ export default function Home() {
                   </div>
                   <div
                     className="font-medium mb-1"
-                    style={{ fontFamily: 'Georgia, serif', fontWeight: 500, fontSize: "1rem", color: "#141413" }}
+                    style={{ fontFamily: "Georgia, serif", fontWeight: 500, fontSize: "1rem", color: "#141413" }}
                   >
                     {item.title}
                   </div>
@@ -229,7 +380,7 @@ export default function Home() {
               <h2
                 className="mb-5"
                 style={{
-                  fontFamily: 'Georgia, serif',
+                  fontFamily: "Georgia, serif",
                   fontWeight: 500,
                   fontSize: "clamp(1.5rem, 3vw, 2.25rem)",
                   color: "#faf9f5",
@@ -255,7 +406,7 @@ export default function Home() {
         style={{ borderTop: "1px solid #f0eee6", backgroundColor: "#f5f4ed" }}
       >
         <p className="text-xs" style={{ color: "#87867f" }}>
-          llms.txt is checked live. All other checks use synthetic demonstration data.
+          All checks are live — fetched directly from your site in real time.
         </p>
       </footer>
     </div>
