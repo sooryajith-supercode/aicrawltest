@@ -21,16 +21,30 @@ interface RobotsTxtResult extends FileCheckResult {
   directives: RobotsDirectives | null
 }
 
+interface PageMarkdownEntry {
+  url: string
+  markdownUrl: string
+  found: boolean
+}
+
+interface PageMarkdownResult {
+  checked: number
+  found: number
+  pages: PageMarkdownEntry[]
+}
+
 interface CheckFilesResponse {
   llmsTxt: FileCheckResult
   robotsTxt: RobotsTxtResult
   sitemapXml: FileCheckResult
+  pageMarkdown: PageMarkdownResult
 }
 
 const FEATURES = [
   { icon: "📄", title: "llms.txt", desc: "Checks for the emerging AI-readable site manifest that tells LLMs how to interact with the site.", live: true },
   { icon: "🤖", title: "Robots.txt", desc: "Verifies robots.txt exists so AI crawlers know how to interact with the site.", live: true },
   { icon: "🗺️", title: "Sitemap.xml", desc: "Checks for a sitemap across common paths and via any Sitemap: directives declared in robots.txt.", live: true },
+  { icon: "📝", title: "Per-page markdown", desc: "Reads your sitemap and checks whether each page has a companion .md file AI agents can consume directly.", live: true },
 ]
 
 function ResultCard({ label, icon, result }: { label: string; icon: string; result: FileCheckResult }) {
@@ -101,6 +115,86 @@ function DirectiveRow({ label, present }: { label: string; present: boolean }) {
       {!present && (
         <span className="text-xs" style={{ color: "#87867f" }}>missing</span>
       )}
+    </div>
+  )
+}
+
+function MarkdownCard({ result }: { result: PageMarkdownResult }) {
+  const allFound = result.found === result.checked
+  const noneFound = result.found === 0
+  const borderColor = allFound
+    ? "rgba(58,124,82,0.25)"
+    : noneFound
+    ? "rgba(181,51,51,0.25)"
+    : "rgba(201,100,66,0.25)"
+  const statusColor = allFound ? "#3a7c52" : noneFound ? "#b53333" : "#c96442"
+  const statusText = allFound
+    ? "All pages have markdown"
+    : noneFound
+    ? "No markdown files found"
+    : `${result.found} of ${result.checked} pages have markdown`
+
+  return (
+    <div
+      className="rounded-[8px] p-5 flex items-start gap-4"
+      style={{
+        backgroundColor: "#faf9f5",
+        border: `1px solid ${borderColor}`,
+        boxShadow: "rgba(0,0,0,0.04) 0px 4px 24px",
+      }}
+    >
+      <span className="text-2xl mt-0.5">📝</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span
+            className="font-medium"
+            style={{ fontFamily: "Georgia, serif", fontSize: "1rem", color: "#141413" }}
+          >
+            Per-page markdown (.md)
+          </span>
+          {allFound ? (
+            <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#3a7c52" }} />
+          ) : (
+            <XCircle className="h-4 w-4 shrink-0" style={{ color: noneFound ? "#b53333" : "#c96442" }} />
+          )}
+        </div>
+        <p className="text-sm mb-3" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
+          <span style={{ color: statusColor, fontWeight: 500 }}>{statusText}</span>
+          {" "}— checked {result.checked} {result.checked === 1 ? "page" : "pages"} from sitemap
+        </p>
+        {result.pages.length > 0 && (
+          <div
+            className="rounded-[6px] p-3 flex flex-col gap-1.5"
+            style={{ backgroundColor: "#f0eee6", border: "1px solid #e8e5da" }}
+          >
+            <p className="text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: "#87867f" }}>
+              Pages checked
+            </p>
+            {result.pages.map((page) => (
+              <div key={page.url} className="flex items-start gap-2">
+                {page.found ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: "#3a7c52" }} />
+                ) : (
+                  <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: "#b53333" }} />
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs break-all" style={{ color: page.found ? "#3a7c52" : "#b53333", fontWeight: 500 }}>
+                    {page.markdownUrl.replace(/^https?:\/\/[^/]+/, "")}
+                  </p>
+                  <p className="text-[11px] break-all" style={{ color: "#87867f" }}>
+                    {page.found ? "Found" : "Not found"} · from {page.url.replace(/^https?:\/\/[^/]+/, "") || "/"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {noneFound && (
+          <p className="text-xs mt-2" style={{ color: "#87867f", lineHeight: 1.5 }}>
+            Add a <code style={{ color: "#c96442" }}>.md</code> companion for each page (e.g. <code style={{ color: "#c96442" }}>/about.md</code>) so AI agents can read clean, structured content.
+          </p>
+        )}
+      </div>
     </div>
   )
 }
@@ -302,7 +396,7 @@ export default function Home() {
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: "#c96442" }} />
           <p className="font-medium" style={{ color: "#141413" }}>Checking files…</p>
           <p className="text-sm mt-1" style={{ color: "#87867f" }}>
-            Looking up llms.txt, robots.txt, and sitemap.xml on your site
+            Looking up llms.txt, robots.txt, sitemap.xml, and per-page markdown files
           </p>
         </section>
       )}
@@ -319,6 +413,7 @@ export default function Home() {
           <ResultCard label="llms.txt" icon="📄" result={results.llmsTxt} />
           <RobotsCard result={results.robotsTxt} />
           <ResultCard label="sitemap.xml" icon="🗺️" result={results.sitemapXml} />
+          <MarkdownCard result={results.pageMarkdown} />
         </section>
       )}
 
