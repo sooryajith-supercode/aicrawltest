@@ -1,7 +1,21 @@
 # AI Crawlability Test
 
-> Free tool to check whether your website has the key files AI crawlers and agents look for — llms.txt, robots.txt, and sitemap.xml.
+> Free tool to check whether your website has the key files AI crawlers and agents look for — llms.txt, robots.txt, sitemap.xml, per-page markdown, and structured data.
 
-## Pages
+## Tool
 
 - [Home](/index.md): Check your site's AI crawlability — enter a URL and instantly see whether llms.txt, robots.txt, and sitemap.xml are present and properly configured.
+
+## Blog
+
+- [What is llms.txt and Why Every Website Needs One](/blog/what-is-llms-txt.md): Introduction to the llms.txt specification, how it works, and why every website needs one to be visible to AI agents and LLMs.
+- [How to Optimize Your Website for AI Search Engines](/blog/optimize-for-ai-search.md): A guide to Answer Engine Optimization (AEO) — how to structure content so AI-powered search engines like Perplexity, ChatGPT, and Claude can cite your site.
+- [robots.txt for AI Crawlers: A Complete 2025 Guide](/blog/robots-txt-ai-crawlers.md): How to configure robots.txt for AI bots — covers GPTBot, ClaudeBot, anthropic-ai, PerplexityBot, and best practices for AI-friendly crawler configuration.
+- [JSON-LD and Structured Data: Making Your Content AI-Readable](/blog/json-ld-structured-data.md): Practical guide to implementing JSON-LD schema markup to improve visibility in AI search engines and knowledge graphs.
+- [The Complete Guide to AI Crawlability in 2025](/blog/ai-crawlability-guide-2025.md): Comprehensive checklist covering every layer of AI crawlability: robots.txt, sitemap.xml, llms.txt, Open Graph, JSON-LD, and per-page markdown.
+
+## API
+
+- [Check Files API](/api/check-files): Quick check endpoint — pass ?url= to test llms.txt, robots.txt, sitemap.xml, and per-page markdown for any domain.
+- [Check Site API](/api/check-site): Full crawlability analysis — tests discovery, content, metadata, and access signals.
+- [Check LLMs API](/api/check-llms): Detailed llms.txt parser — validates format, structure, and compliance with the llmstxt.org specification.
