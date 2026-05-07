@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
     ? `${origin}/.well-known/llms.txt`
     : `${origin}/llms.txt`
 
-  // Per-page markdown check — fetch sitemap and probe .md companions
+  // Per-page markdown check — fetch real page HTML and look for link tag
   const pageMarkdown = await checkPageMarkdown(origin, sitemapFound ? sitemapUrl : null)
 
   return NextResponse.json({
@@ -121,26 +121,31 @@ export async function GET(request: NextRequest) {
   })
 }
 
-function extractPageUrls(xmlText: string): string[] {
+function extractSitemapPageUrls(xmlText: string): string[] {
   const matches = xmlText.match(/<loc>([^<]+)<\/loc>/gi) ?? []
   return matches
     .map((m) => m.replace(/<\/?loc>/gi, "").trim())
     .filter((u) => {
       try {
         const p = new URL(u)
-        // Skip image/video/news sitemaps and root-only URLs
         return !p.pathname.match(/\.(jpg|jpeg|png|gif|webp|svg|mp4|pdf)$/i)
       } catch { return false }
     })
 }
 
-function toMarkdownUrl(pageUrl: string): string {
-  const u = new URL(pageUrl)
-  let path = u.pathname.replace(/\/$/, "") // strip trailing slash
-  if (!path || path === "/") return `${u.origin}/index.md`
-  // Replace .html extension or append .md
-  path = path.replace(/\.html?$/, "")
-  return `${u.origin}${path}.md`
+// Find <link rel="alternate" type="text/markdown" href="..."> in HTML
+function findMarkdownLinkTag(html: string): string | null {
+  const head = html.slice(0, 15000) // only need the <head>
+  const linkTagRegex = /<link\s[^>]+>/gi
+  let match: RegExpExecArray | null
+  while ((match = linkTagRegex.exec(head)) !== null) {
+    const tag = match[0]
+    if (/type=["']text\/markdown["']/i.test(tag)) {
+      const href = tag.match(/href=["']([^"']+)["']/i)
+      if (href) return href[1]
+    }
+  }
+  return null
 }
 
 async function checkPageMarkdown(origin: string, sitemapUrl: string | null): Promise<{
@@ -148,44 +153,41 @@ async function checkPageMarkdown(origin: string, sitemapUrl: string | null): Pro
   found: number
   pages: Array<{ url: string; markdownUrl: string; found: boolean }>
 }> {
-  const MAX_PAGES = 10
-
-  let pageUrls: string[] = []
+  // Always check the homepage; pick one more page from the sitemap
+  const pagesToCheck: string[] = [`${origin}/`]
 
   if (sitemapUrl) {
     try {
       const res = await tryFetch(sitemapUrl)
       if (res?.ok) {
         const xml = await res.text()
-        const allUrls = extractPageUrls(xml)
-        // Prefer non-root pages; skip the origin itself
-        pageUrls = allUrls
-          .filter((u) => {
-            try { return new URL(u).pathname !== "/" } catch { return false }
-          })
-          .slice(0, MAX_PAGES)
-        // If sitemap only had the root, include it
-        if (pageUrls.length === 0 && allUrls.length > 0) {
-          pageUrls = allUrls.slice(0, MAX_PAGES)
-        }
+        const allUrls = extractSitemapPageUrls(xml)
+        const nonRoot = allUrls.find((u) => {
+          try { return new URL(u).pathname !== "/" } catch { return false }
+        })
+        if (nonRoot) pagesToCheck.push(nonRoot)
       }
     } catch { /* fall through */ }
   }
 
-  // Fallback: check a few common pages from the origin
-  if (pageUrls.length === 0) {
-    pageUrls = ["/about", "/blog", "/docs", "/help", "/pricing", "/contact"]
-      .map((p) => `${origin}${p}`)
-  }
+  // Fetch HTML for each page in parallel
+  const htmlResponses = await Promise.all(pagesToCheck.map((u) => tryFetch(u)))
 
-  const markdownUrls = pageUrls.map(toMarkdownUrl)
-  const responses = await Promise.all(markdownUrls.map((u) => tryFetch(u)))
-
-  const pages = pageUrls.map((url, i) => ({
-    url,
-    markdownUrl: markdownUrls[i],
-    found: responses[i]?.ok ?? false,
-  }))
+  const pages = await Promise.all(
+    pagesToCheck.map(async (pageUrl, i) => {
+      const res = htmlResponses[i]
+      if (!res?.ok) return { url: pageUrl, markdownUrl: "", found: false }
+      try {
+        const html = await res.text()
+        const href = findMarkdownLinkTag(html)
+        if (href) {
+          const markdownUrl = href.startsWith("http") ? href : `${origin}${href}`
+          return { url: pageUrl, markdownUrl, found: true }
+        }
+      } catch { /* fall through */ }
+      return { url: pageUrl, markdownUrl: "", found: false }
+    })
+  )
 
   return {
     checked: pages.length,

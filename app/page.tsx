@@ -46,7 +46,7 @@ const FEATURES = [
   { icon: "📄", title: "llms.txt", desc: "Checks for the emerging AI-readable site manifest that tells LLMs how to interact with the site.", live: true },
   { icon: "🤖", title: "Robots.txt", desc: "Verifies robots.txt exists so AI crawlers know how to interact with the site.", live: true },
   { icon: "🗺️", title: "Sitemap.xml", desc: "Checks for a sitemap across common paths and via any Sitemap: directives declared in robots.txt.", live: true },
-  { icon: "📝", title: "Per-page markdown", desc: "Reads your sitemap and checks whether each page has a companion .md file AI agents can consume directly.", live: true },
+  { icon: "📝", title: "Per-page markdown", desc: "Fetches your homepage and one other page and checks for a <link type=\"text/markdown\"> tag declaring the Markdown version.", live: true },
 ]
 
 function ResultCard({ label, icon, result }: { label: string; icon: string; result: FileCheckResult }) {
@@ -162,7 +162,8 @@ function MarkdownCard({ result }: { result: PageMarkdownResult }) {
         </div>
         <p className="text-sm mb-3" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
           <span style={{ color: statusColor, fontWeight: 500 }}>{statusText}</span>
-          {" "}— checked {result.checked} {result.checked === 1 ? "page" : "pages"} from sitemap
+          {" "}— checked {result.checked} {result.checked === 1 ? "page" : "pages"} for{" "}
+          <code style={{ color: "#87867f", fontSize: "0.8rem" }}>{"<link type=\"text/markdown\">"}</code>
         </p>
         {result.pages.length > 0 && (
           <div
@@ -180,11 +181,13 @@ function MarkdownCard({ result }: { result: PageMarkdownResult }) {
                   <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: "#b53333" }} />
                 )}
                 <div className="min-w-0">
-                  <p className="text-xs break-all" style={{ color: page.found ? "#3a7c52" : "#b53333", fontWeight: 500 }}>
-                    {page.markdownUrl.replace(/^https?:\/\/[^/]+/, "")}
+                  <p className="text-xs break-all" style={{ color: "#87867f" }}>
+                    {page.url.replace(/^https?:\/\/[^/]+/, "") || "/"}
                   </p>
-                  <p className="text-[11px] break-all" style={{ color: "#87867f" }}>
-                    {page.found ? "Found" : "Not found"} · from {page.url.replace(/^https?:\/\/[^/]+/, "") || "/"}
+                  <p className="text-[11px] break-all" style={{ color: page.found ? "#3a7c52" : "#b53333" }}>
+                    {page.found
+                      ? `link tag found → ${page.markdownUrl}`
+                      : "no <link type=\"text/markdown\"> found"}
                   </p>
                 </div>
               </div>
@@ -193,7 +196,7 @@ function MarkdownCard({ result }: { result: PageMarkdownResult }) {
         )}
         {noneFound && (
           <p className="text-xs mt-2" style={{ color: "#87867f", lineHeight: 1.5 }}>
-            Add a <code style={{ color: "#c96442" }}>.md</code> companion for each page (e.g. <code style={{ color: "#c96442" }}>/about.md</code>) so AI agents can read clean, structured content.
+            Add <code style={{ color: "#c96442" }}>{"<link rel=\"alternate\" type=\"text/markdown\" href=\"/page.md\">"}</code> to each page&apos;s <code style={{ color: "#c96442" }}>&lt;head&gt;</code> so AI agents can discover the clean Markdown version.
           </p>
         )}
       </div>
@@ -409,7 +412,7 @@ export default function Home() {
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: "#c96442" }} />
           <p className="font-medium" style={{ color: "#141413" }}>Checking files…</p>
           <p className="text-sm mt-1" style={{ color: "#87867f" }}>
-            Looking up llms.txt, robots.txt, sitemap.xml, and per-page markdown files
+            Looking up llms.txt, robots.txt, sitemap.xml, and markdown link tags
           </p>
         </section>
       )}
