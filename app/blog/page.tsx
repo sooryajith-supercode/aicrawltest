@@ -115,7 +115,7 @@ export default function BlogIndexPage() {
 
               <Link href={`/blog/${post.slug}`} style={{ textDecoration: "none" }}>
                 <h2
-                  className="mb-2 transition-colors"
+                  className="mb-2 hover-accent"
                   style={{
                     fontFamily: "Georgia, serif",
                     fontWeight: 500,
@@ -123,8 +123,6 @@ export default function BlogIndexPage() {
                     color: "#141413",
                     lineHeight: 1.3,
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#c96442")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#141413")}
                 >
                   {post.title}
                 </h2>

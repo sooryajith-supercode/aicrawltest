@@ -323,10 +323,8 @@ export default async function BlogPostPage({ params }: Props) {
                   style={{ textDecoration: "none", display: "block" }}
                 >
                   <p
-                    className="mt-1 text-base font-medium transition-colors"
+                    className="mt-1 text-base font-medium hover-accent"
                     style={{ fontFamily: "Georgia, serif", color: "#141413" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#c96442")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#141413")}
                   >
                     {rel.title}
                   </p>

@@ -53,3 +53,7 @@ body {
 .font-serif {
   font-family: Georgia, "Times New Roman", serif;
 }
+
+.hover-accent:hover {
+  color: #c96442 !important;
+}
