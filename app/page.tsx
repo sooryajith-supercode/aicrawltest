@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Loader2, CheckCircle2, XCircle } from "lucide-react"
+import { BLOG_POSTS } from "@/lib/blog"
 
 interface FileCheckResult {
   found: boolean
@@ -318,9 +320,20 @@ export default function Home() {
         >
           AI Crawlability Test
         </span>
-        <span className="text-xs" style={{ color: "#87867f" }}>
-          v{process.env.NEXT_PUBLIC_APP_VERSION} · Live checks
-        </span>
+        <div className="flex items-center gap-5">
+          <Link
+            href="/blog"
+            className="text-sm font-medium transition-colors"
+            style={{ color: "#5e5d59", textDecoration: "none" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#c96442")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#5e5d59")}
+          >
+            Blog
+          </Link>
+          <span className="text-xs" style={{ color: "#87867f" }}>
+            v{process.env.NEXT_PUBLIC_APP_VERSION} · Live checks
+          </span>
+        </div>
       </header>
 
       {/* Hero */}
@@ -464,6 +477,69 @@ export default function Home() {
                   <div className="text-sm" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
                     {item.desc}
                   </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Blog preview */}
+          <section className="max-w-2xl mx-auto px-6 pb-20">
+            <div className="flex items-center justify-between mb-8">
+              <h2
+                style={{
+                  fontFamily: "Georgia, serif",
+                  fontWeight: 500,
+                  fontSize: "1.3rem",
+                  color: "#141413",
+                  lineHeight: 1.2,
+                }}
+              >
+                From the blog
+              </h2>
+              <Link
+                href="/blog"
+                className="text-sm transition-colors"
+                style={{ color: "#c96442", textDecoration: "none" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#a0502f")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#c96442")}
+              >
+                All posts →
+              </Link>
+            </div>
+            <div className="flex flex-col" style={{ borderTop: "1px solid #e8e5da" }}>
+              {BLOG_POSTS.slice(0, 3).map((post) => (
+                <div
+                  key={post.slug}
+                  className="py-5"
+                  style={{ borderBottom: "1px solid #e8e5da" }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className="text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                      style={{ backgroundColor: "rgba(201,100,66,0.1)", color: "#c96442" }}
+                    >
+                      {post.category}
+                    </span>
+                    <span className="text-xs" style={{ color: "#87867f" }}>
+                      {post.readingTimeMinutes} min read
+                    </span>
+                  </div>
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <p
+                      className="font-medium transition-colors"
+                      style={{ fontFamily: "Georgia, serif", color: "#141413", fontSize: "1rem", lineHeight: 1.35 }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = "#c96442")}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = "#141413")}
+                    >
+                      {post.title}
+                    </p>
+                  </Link>
+                  <p className="text-sm mt-1.5" style={{ color: "#5e5d59", lineHeight: 1.55 }}>
+                    {post.description.slice(0, 120)}…
+                  </p>
                 </div>
               ))}
             </div>
