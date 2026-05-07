@@ -960,6 +960,243 @@ return (
       },
     ],
   },
+  {
+    slug: "per-page-markdown-files",
+    title: "Per-Page Markdown Files: The Easiest Win for AI Crawlability",
+    description:
+      "Learn how adding a .md companion file to each page gives AI agents clean, distraction-free content — and why this simple technique dramatically improves how AI systems read and cite your site.",
+    publishedAt: "2025-05-06",
+    author: "Soorya",
+    category: "Guides",
+    tags: [
+      "markdown",
+      "per-page markdown",
+      "AI crawlability",
+      "llms.txt",
+      "content accessibility",
+      "AI agents",
+    ],
+    readingTimeMinutes: 7,
+    sections: [
+      {
+        type: "p",
+        content:
+          "Most website optimisation advice is complicated — structured data schemas, robots.txt directives, sitemap configurations. Per-page Markdown files are the exception. They're simple text files that live alongside your existing pages, and they give AI agents exactly what they need: your content, with nothing else in the way.",
+      },
+      {
+        type: "h2",
+        content: "What Is a Per-Page Markdown File?",
+      },
+      {
+        type: "p",
+        content:
+          "A per-page Markdown file is a <code>.md</code> companion that mirrors the content of an HTML page. If your site has a page at <code>/blog/what-is-llms-txt</code>, you add a file at <code>/blog/what-is-llms-txt.md</code> containing the same article in plain Markdown — no navigation, no ads, no JavaScript, no boilerplate HTML.",
+      },
+      {
+        type: "p",
+        content:
+          "The HTML page remains exactly as it is for human visitors. The <code>.md</code> file is there exclusively for machines: AI agents, LLMs, and crawlers that prefer clean, lightweight text over fully rendered web pages.",
+      },
+      {
+        type: "h2",
+        content: "Why AI Agents Prefer Markdown",
+      },
+      {
+        type: "p",
+        content:
+          "When an AI agent visits an HTML page, it has to do a lot of work before it can read your content. It must parse the HTML tree, strip navigation and footer markup, skip over cookie banners and ad slots, ignore inline scripts, and extract the actual article text — all within a limited context window.",
+      },
+      {
+        type: "p",
+        content:
+          "A Markdown file eliminates all of that. The agent opens the file and your content starts on line one. No noise, no parsing overhead, no risk of the agent filling its context window with boilerplate instead of your ideas.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Clean text — no HTML tags, scripts, or layout elements to filter out",
+          "Smaller file size — loads faster within crawl budget limits",
+          "Predictable structure — headings, lists, and code blocks are immediately parseable",
+          "Better citations — AI systems produce more accurate quotes when the source is unambiguous",
+          "Context window efficient — more of your actual content fits in a single read",
+        ],
+      },
+      {
+        type: "h2",
+        content: "How to Declare a Markdown File in Your Page Head",
+      },
+      {
+        type: "p",
+        content:
+          "Simply publishing a <code>.md</code> file isn't enough — you also need to tell AI agents it exists. The standard way is a <code>&lt;link&gt;</code> tag in your page's <code>&lt;head&gt;</code>:",
+      },
+      {
+        type: "code",
+        language: "html",
+        content: `<link rel="alternate" type="text/markdown" href="/blog/what-is-llms-txt.md">`,
+      },
+      {
+        type: "p",
+        content:
+          "This tag is the same pattern used by developers.cloudflare.com and recommended by llmstxt.org. AI agents that support the spec check for it when they visit a page, and follow the <code>href</code> to fetch the Markdown version directly. The <a href='/'>AI Crawlability Test</a> tool checks for exactly this tag on your pages.",
+      },
+      {
+        type: "h2",
+        content: "What to Include in a Per-Page Markdown File",
+      },
+      {
+        type: "p",
+        content:
+          "A good per-page Markdown file contains only the content a reader — human or machine — came for:",
+      },
+      {
+        type: "ol",
+        items: [
+          "<strong>A top-level heading</strong> (<code>#</code>) matching the page title",
+          "<strong>A short description</strong> — one or two sentences summarising the page",
+          "<strong>The full article body</strong> — all headings, paragraphs, lists, and code blocks",
+          "<strong>No navigation links, headers, footers, or sidebars</strong>",
+          "<strong>No cookie notices, subscription forms, or promotional banners</strong>",
+        ],
+      },
+      {
+        type: "p",
+        content:
+          "Optionally include frontmatter at the top for metadata that downstream tools may use:",
+      },
+      {
+        type: "code",
+        language: "markdown",
+        content: `---
+title: What is llms.txt and Why Every Website Needs One
+description: Learn about the llms.txt specification for AI agents.
+author: Soorya
+publishedAt: 2025-04-01
+---
+
+# What is llms.txt and Why Every Website Needs One
+
+In the age of AI-powered search, a new file is rapidly becoming...`,
+      },
+      {
+        type: "h2",
+        content: "Implementing in Next.js",
+      },
+      {
+        type: "p",
+        content:
+          "In a Next.js project, the simplest approach is to place static <code>.md</code> files in your <code>public/</code> directory. They're served directly by the web server with no build step required:",
+      },
+      {
+        type: "code",
+        language: "text",
+        content: `public/
+  blog/
+    what-is-llms-txt.md
+    robots-txt-ai-crawlers.md
+    per-page-markdown-files.md`,
+      },
+      {
+        type: "p",
+        content:
+          "Then declare the link tag in your blog post layout. In Next.js App Router, add it to the <code>generateMetadata</code> function or directly in the page's <code>&lt;head&gt;</code> via the layout:",
+      },
+      {
+        type: "code",
+        language: "typescript",
+        content: `// app/blog/[slug]/page.tsx
+export async function generateMetadata({ params }: Props) {
+  const { slug } = await params
+  return {
+    alternates: {
+      types: {
+        "text/markdown": \`/blog/\${slug}.md\`,
+      },
+    },
+  }
+}`,
+      },
+      {
+        type: "h2",
+        content: "Connecting Markdown Files to llms.txt",
+      },
+      {
+        type: "p",
+        content:
+          "Once you have per-page Markdown files, reference them in your <code>llms.txt</code> rather than the HTML URLs. This gives AI agents that read llms.txt first a direct path to the clean content, without having to visit the HTML page at all:",
+      },
+      {
+        type: "code",
+        language: "markdown",
+        content: `# My Site
+
+> A crawlability testing tool for AI agents.
+
+## Blog
+
+- [What is llms.txt?](/blog/what-is-llms-txt.md): Introduction to the llms.txt standard.
+- [robots.txt for AI Crawlers](/blog/robots-txt-ai-crawlers.md): Complete 2025 guide.
+- [Per-Page Markdown Files](/blog/per-page-markdown-files.md): How .md files improve AI readability.`,
+      },
+      {
+        type: "h2",
+        content: "Which Pages Should Have Markdown Files?",
+      },
+      {
+        type: "p",
+        content:
+          "You don't need to create Markdown companions for every page on your site. Prioritise the ones AI agents are most likely to read and cite:",
+      },
+      {
+        type: "ul",
+        items: [
+          "<strong>Blog posts and articles</strong> — Your primary knowledge content",
+          "<strong>Documentation pages</strong> — Especially API references and how-to guides",
+          "<strong>About and company pages</strong> — Helps AI systems accurately describe your organisation",
+          "<strong>Product and feature pages</strong> — Ensures AI gives correct information about what you offer",
+          "<strong>FAQ pages</strong> — Perfect for AI agents looking for direct answers",
+        ],
+      },
+      {
+        type: "p",
+        content:
+          "You can skip Markdown files for pages like login screens, checkout flows, account dashboards, and anything behind authentication — AI agents shouldn't be reading those anyway.",
+      },
+      {
+        type: "h2",
+        content: "Keeping Markdown Files in Sync",
+      },
+      {
+        type: "p",
+        content:
+          "The main maintenance consideration with per-page Markdown files is keeping them in sync with the HTML content. When you update a blog post, remember to update the <code>.md</code> companion too.",
+      },
+      {
+        type: "p",
+        content:
+          "For content-heavy sites, consider generating <code>.md</code> files automatically from your content source — whether that's a CMS, a database, or Markdown-first authoring (in which case the <code>.md</code> files are already your source of truth and no extra work is needed).",
+      },
+      {
+        type: "callout",
+        content:
+          "Check right now whether your pages declare their Markdown companions: enter your URL in the <a href='/'>AI Crawlability Test</a> tool. It fetches your homepage and one additional page, looking for the <code>&lt;link type=\"text/markdown\"&gt;</code> tag in each page's head.",
+      },
+      {
+        type: "h2",
+        content: "The Compounding Effect",
+      },
+      {
+        type: "p",
+        content:
+          "Per-page Markdown files work best as part of a complete AI crawlability stack. On their own, they make your content easier to read. Combined with a well-structured <code>llms.txt</code> that links to them, a <code>robots.txt</code> that allows AI crawlers, and JSON-LD that classifies your content, they form a system where AI agents can find your site, understand what it's about, navigate to the right page, and read clean content — all without friction.",
+      },
+      {
+        type: "p",
+        content:
+          "That frictionless path from discovery to content is what gets you cited. And in an AI-first web, being cited is the new being ranked.",
+      },
+    ],
+  },
 ]
 
 export function getBlogPost(slug: string): BlogPost | undefined {
