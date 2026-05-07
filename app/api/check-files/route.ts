@@ -1,4 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
+import { kv } from "@vercel/kv"
+
+async function logUrl(url: string) {
+  if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) return
+  try {
+    await kv.lpush("checked_urls", JSON.stringify({ url, at: new Date().toISOString() }))
+    await kv.ltrim("checked_urls", 0, 4999) // keep last 5 000 entries
+  } catch {
+    // never let logging break the main response
+  }
+}
 
 const USER_AGENT = "AI-Crawlability-Bot/1.0 (+https://aicrawltest.vercel.app)"
 const TIMEOUT_MS = 7000
@@ -112,6 +123,8 @@ export async function GET(request: NextRequest) {
 
   // Per-page markdown check — fetch real page HTML and look for link tag
   const pageMarkdown = await checkPageMarkdown(origin, sitemapFound ? sitemapUrl : null)
+
+  await logUrl(origin)
 
   return NextResponse.json({
     llmsTxt: { found: llmsFound, url: llmsUrl },
