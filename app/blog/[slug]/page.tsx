@@ -240,7 +240,10 @@ export default async function BlogPostPage({ params }: Props) {
             {post.category}
           </span>
           <span className="text-sm" style={{ color: "#87867f" }}>
-            {formatDate(post.publishedAt)}
+            By {post.author}
+          </span>
+          <span className="text-sm" style={{ color: "#87867f" }}>
+            · {formatDate(post.publishedAt)}
           </span>
           <span className="text-sm" style={{ color: "#87867f" }}>
             · {post.readingTimeMinutes} min read
