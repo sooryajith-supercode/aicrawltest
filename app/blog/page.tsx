@@ -3,14 +3,14 @@ import Link from "next/link"
 import { BLOG_POSTS } from "@/lib/blog"
 
 export const metadata: Metadata = {
-  title: "Blog — AI Crawlability & SEO Guides",
+  title: "Blog — Crawlability & AI SEO Guides",
   description:
     "In-depth guides on AI crawlability, llms.txt, robots.txt for AI crawlers, structured data, and optimizing your website for AI-powered search engines.",
   alternates: {
     canonical: "/blog",
   },
   openGraph: {
-    title: "Blog — AI Crawlability & SEO Guides",
+    title: "Blog — Crawlability & AI SEO Guides",
     description:
       "In-depth guides on AI crawlability, llms.txt, robots.txt, structured data, and AI search engine optimization.",
     url: "https://aicrawltest.com/blog",

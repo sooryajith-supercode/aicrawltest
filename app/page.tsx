@@ -342,7 +342,7 @@ export default function Home() {
           className="text-xs font-medium uppercase mb-6"
           style={{ color: "#87867f", letterSpacing: "0.5px" }}
         >
-          Free Tool
+          Free Crawlability Checker
         </p>
         <h1
           className="mb-5"
@@ -355,13 +355,13 @@ export default function Home() {
             letterSpacing: "-0.01em",
           }}
         >
-          Is your site ready for AI?
+          Test your site's crawlability
         </h1>
         <p
           className="text-lg max-w-lg mx-auto mb-10"
           style={{ color: "#5e5d59", lineHeight: 1.6 }}
         >
-          Check whether your website has the key files AI crawlers and agents look for.
+          Check whether AI crawlers, search bots, and agents can access your content — llms.txt, robots.txt, sitemap.xml, and more.
         </p>
 
         {/* Search form */}
