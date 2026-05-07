@@ -24,7 +24,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       "Learn about the llms.txt specification — the emerging standard that helps AI agents and large language models understand and navigate your website's content.",
     publishedAt: "2025-04-01",
-    author: "AI Crawlability Test",
+    author: "Soorya",
     category: "Guides",
     tags: ["llms.txt", "AI crawlability", "LLM", "AI agents", "site manifest"],
     readingTimeMinutes: 7,
@@ -180,7 +180,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       "AI-powered search engines like Perplexity, ChatGPT Browse, and Claude work very differently from Google. Here's how to optimize your site for the new paradigm of answer engine optimization.",
     publishedAt: "2025-04-08",
-    author: "AI Crawlability Test",
+    author: "Soorya",
     category: "SEO",
     tags: [
       "AI SEO",
@@ -349,7 +349,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       "A comprehensive guide to configuring robots.txt for AI bots in 2025. Learn which user agents to allow, how to protect sensitive paths, and best practices for AI-friendly crawler configuration.",
     publishedAt: "2025-04-15",
-    author: "AI Crawlability Test",
+    author: "Soorya",
     category: "Guides",
     tags: [
       "robots.txt",
@@ -531,7 +531,7 @@ Allow: /`,
     description:
       "A practical guide to implementing JSON-LD structured data markup on your website to improve visibility in AI search engines, rich results, and knowledge graphs.",
     publishedAt: "2025-04-22",
-    author: "AI Crawlability Test",
+    author: "Soorya",
     category: "Technical SEO",
     tags: [
       "JSON-LD",
@@ -772,7 +772,7 @@ return (
     description:
       "Everything you need to make your website visible to AI search engines and agents. A comprehensive checklist covering llms.txt, robots.txt, sitemaps, structured data, Open Graph, and per-page markdown.",
     publishedAt: "2025-04-29",
-    author: "AI Crawlability Test",
+    author: "Soorya",
     category: "Guides",
     tags: [
       "AI crawlability",

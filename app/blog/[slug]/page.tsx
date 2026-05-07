@@ -183,9 +183,8 @@ export default async function BlogPostPage({ params }: Props) {
     description: post.description,
     datePublished: post.publishedAt,
     author: {
-      "@type": "Organization",
+      "@type": "Person",
       name: post.author,
-      url: SITE_URL,
     },
     publisher: {
       "@type": "Organization",
