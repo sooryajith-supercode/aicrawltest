@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Loader2, CheckCircle2, XCircle } from "lucide-react"
 import { BLOG_POSTS } from "@/lib/blog"
+import { supabase } from "@/lib/supabase"
 
 interface FileCheckResult {
   found: boolean
@@ -301,6 +302,7 @@ export default function Home() {
       if (!res.ok) throw new Error("API error")
       const data: CheckFilesResponse = await res.json()
       setResults(data)
+      await supabase.from("scanned_urls").insert({ url: normalized })
     } catch {
       setError("Something went wrong. Please try again.")
     } finally {
