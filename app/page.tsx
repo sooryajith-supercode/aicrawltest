@@ -352,7 +352,7 @@ export default function Home() {
           className="text-xs font-medium uppercase mb-6"
           style={{ color: "#87867f", letterSpacing: "0.5px" }}
         >
-          Free Crawlability Checker
+          Free AI Crawl Test
         </p>
         <h1
           className="mb-5"
@@ -371,7 +371,7 @@ export default function Home() {
           className="text-lg max-w-lg mx-auto mb-10"
           style={{ color: "#5e5d59", lineHeight: 1.6 }}
         >
-          Check whether AI crawlers, search bots, and agents can access your content — llms.txt, robots.txt, sitemap.xml, and more.
+          Run a free AI crawl test to check whether AI crawlers, search bots, and agents can access your content — llms.txt, robots.txt, sitemap.xml, and more.
         </p>
 
         {/* Search form */}

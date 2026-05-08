@@ -18,12 +18,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Free Crawlability Test & Checker — AI Crawler Readiness",
-    template: "%s | Crawlability Test",
+    default: "Free AI Crawl Test & Crawlability Checker — AI Crawler Readiness",
+    template: "%s | AI Crawl Test",
   },
   description:
-    "Free crawlability test & checker for any website. Instantly see if AI crawlers, GPTBot, ClaudeBot, Perplexity, and search bots can access your content. Tests llms.txt, robots.txt, and sitemap.xml. No signup needed.",
+    "Free AI crawl test & crawlability checker for any website. Instantly see if AI crawlers, GPTBot, ClaudeBot, Perplexity, and search bots can access your content. Tests llms.txt, robots.txt, and sitemap.xml. No signup needed.",
   keywords: [
+    "AI crawl test",
+    "AI crawl checker",
+    "AI crawl",
     "crawlability test",
     "crawlability checker",
     "check crawlability",
@@ -51,17 +54,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "AI Crawlability Test",
-    title: "Free Crawlability Test & Checker — AI Crawler Readiness",
+    title: "Free AI Crawl Test & Crawlability Checker — AI Crawler Readiness",
     description:
-      "Free crawlability test & checker for any website. Instantly see if AI crawlers, search bots, and agents can access your content. Tests llms.txt, robots.txt, sitemap.xml. No signup needed.",
+      "Free AI crawl test & crawlability checker for any website. Instantly see if AI crawlers, search bots, and agents can access your content. Tests llms.txt, robots.txt, sitemap.xml. No signup needed.",
     url: SITE_URL,
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free Crawlability Test & Checker — AI Crawler Readiness",
+    title: "Free AI Crawl Test & Crawlability Checker — AI Crawler Readiness",
     description:
-      "Free crawlability test & checker. Instantly see if AI crawlers and search bots can access your site. Tests llms.txt, robots.txt, sitemap.xml. No signup.",
+      "Free AI crawl test & crawlability checker. Instantly see if AI crawlers and search bots can access your site. Tests llms.txt, robots.txt, sitemap.xml. No signup.",
     creator: "@aicrawltest",
   },
   robots: {
