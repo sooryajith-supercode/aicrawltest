@@ -587,7 +587,10 @@ export default function Home() {
         style={{ borderTop: "1px solid #f0eee6", backgroundColor: "#f5f4ed" }}
       >
         <p className="text-xs" style={{ color: "#87867f" }}>
-          All checks are live — fetched directly from your site in real time.
+          All checks are live — fetched directly from your site in real time.{" "}
+          <Link href="/changelog" className="underline underline-offset-2 hover-accent" style={{ color: "#87867f" }}>
+            Changelog
+          </Link>
         </p>
       </footer>
     </div>
