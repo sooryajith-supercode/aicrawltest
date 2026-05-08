@@ -128,8 +128,8 @@ function extractPageUrls(xmlText: string): string[] {
     .filter((u) => {
       try {
         const p = new URL(u)
-        // Skip image/video/news sitemaps and root-only URLs
-        return !p.pathname.match(/\.(jpg|jpeg|png|gif|webp|svg|mp4|pdf)$/i)
+        // Skip sitemap index entries (.xml) and media files
+        return !p.pathname.match(/\.(jpg|jpeg|png|gif|webp|svg|mp4|pdf|xml)$/i)
       } catch { return false }
     })
 }
