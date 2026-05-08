@@ -327,11 +327,16 @@ export default function Home() {
         </span>
         <div className="flex items-center gap-5">
           <Link
-            href="/blog"
-            className="text-sm font-medium transition-colors"
+            href="/whats-new"
+            className="text-sm font-medium hover-accent"
             style={{ color: "#5e5d59", textDecoration: "none" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#c96442")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#5e5d59")}
+          >
+            What's new in AEO
+          </Link>
+          <Link
+            href="/blog"
+            className="text-sm font-medium hover-accent"
+            style={{ color: "#5e5d59", textDecoration: "none" }}
           >
             Blog
           </Link>

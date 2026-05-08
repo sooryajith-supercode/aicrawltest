@@ -220,13 +220,22 @@ export default async function BlogPostPage({ params }: Props) {
         >
           AI Crawlability Test
         </Link>
-        <Link
-          href="/blog"
-          className="text-sm font-medium"
-          style={{ color: "#c96442" }}
-        >
-          ← Blog
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link
+            href="/whats-new"
+            className="text-sm font-medium hover-accent"
+            style={{ color: "#5e5d59", textDecoration: "none" }}
+          >
+            What's new in AEO
+          </Link>
+          <Link
+            href="/blog"
+            className="text-sm font-medium"
+            style={{ color: "#c96442" }}
+          >
+            ← Blog
+          </Link>
+        </div>
       </header>
 
       {/* Article */}
