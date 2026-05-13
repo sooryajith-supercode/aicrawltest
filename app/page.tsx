@@ -394,23 +394,6 @@ export default function Home() {
 
         {error && <p className="text-sm mb-3" style={{ color: "#b53333" }}>{error}</p>}
 
-        {/* Example links */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center">
-          <span className="text-sm" style={{ color: "#87867f" }}>Try:</span>
-          {examples.map((ex) => (
-            <button
-              key={ex}
-              type="button"
-              onClick={() => { setUrl(ex); setError(""); setResults(null) }}
-              className="text-sm underline underline-offset-2 transition-colors"
-              style={{ color: "#c96442" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#a0502f")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#c96442")}
-            >
-              {ex}
-            </button>
-          ))}
-        </div>
       </section>
 
       {/* Loading */}

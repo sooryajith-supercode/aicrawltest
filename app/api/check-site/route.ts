@@ -4,13 +4,13 @@ import type { CheckResult } from "@/lib/crawl-data"
 const USER_AGENT = "AI-Crawlability-Bot/1.0 (+https://aicrawltest.vercel.app)"
 const TIMEOUT_MS = 7000
 
-async function tryFetch(url: string): Promise<Response | null> {
+async function tryFetch(url: string, extraHeaders?: Record<string, string>): Promise<Response | null> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
   try {
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { "User-Agent": USER_AGENT, Accept: "*/*" },
+      headers: { "User-Agent": USER_AGENT, Accept: "*/*", ...extraHeaders },
       redirect: "follow",
     })
     clearTimeout(timer)
@@ -168,6 +168,64 @@ async function checkApiAccess(origin: string): Promise<CheckResult> {
   }
 }
 
+async function checkMarkdownRepresentation(origin: string): Promise<CheckResult> {
+  const base: Omit<CheckResult, "status" | "detail" | "recommendation"> = {
+    id: "markdown-repr",
+    category: "Content",
+    name: "Markdown representation",
+    description: "Pages serve a Markdown version so AI agents can consume clean, structured text",
+    weight: 10,
+    isReal: true,
+  }
+
+  // Strategy 1: /page.md and /index.md
+  for (const path of ["/index.md", "/page.md"]) {
+    const res = await tryFetch(`${origin}${path}`)
+    if (res?.ok) {
+      const ct = res.headers.get("content-type") ?? ""
+      const ctLabel = ct ? ` · Content-Type: ${ct.split(";")[0].trim()}` : ""
+      return { ...base, status: "pass", detail: `Markdown file served at ${path}${ctLabel}` }
+    }
+  }
+
+  // Strategy 2: query params — ?format=markdown, ?markdown=1, ?output=markdown
+  for (const qs of ["format=markdown", "markdown=1", "output=markdown"]) {
+    const url = `${origin}/?${qs}`
+    const res = await tryFetch(url, { Accept: "text/markdown, text/plain;q=0.9" })
+    if (res?.ok) {
+      const ct = res.headers.get("content-type") ?? ""
+      if (/markdown|text\/plain/i.test(ct)) {
+        return {
+          ...base,
+          status: "pass",
+          detail: `Markdown via query param (?${qs}) · Content-Type: ${ct.split(";")[0].trim()}`,
+        }
+      }
+    }
+  }
+
+  // Strategy 3: Accept: text/markdown content negotiation
+  const negotiated = await tryFetch(`${origin}/`, { Accept: "text/markdown" })
+  if (negotiated?.ok) {
+    const ct = negotiated.headers.get("content-type") ?? ""
+    if (/markdown/i.test(ct)) {
+      return {
+        ...base,
+        status: "pass",
+        detail: `Server honours Accept: text/markdown · Content-Type: ${ct.split(";")[0].trim()}`,
+      }
+    }
+  }
+
+  return {
+    ...base,
+    status: "fail",
+    detail: "No Markdown representation found via .md URL, query params, or Accept: text/markdown header",
+    recommendation:
+      "Expose Markdown versions of pages at /page.md, respond to ?format=markdown, or support Accept: text/markdown content negotiation so AI agents receive clean text",
+  }
+}
+
 async function checkHomepage(origin: string): Promise<CheckResult[]> {
   const res = await tryFetch(origin)
 
@@ -256,12 +314,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "invalid url" }, { status: 400 })
   }
 
-  const [llmsTxt, robotsTxt, sitemap, knowledgeHub, apiAccess, homepageChecks] = await Promise.all([
+  const [llmsTxt, robotsTxt, sitemap, knowledgeHub, apiAccess, markdownRepr, homepageChecks] = await Promise.all([
     checkLlmsTxt(origin),
     checkRobotsTxt(origin),
     checkSitemap(origin),
     checkKnowledgeHub(origin),
     checkApiAccess(origin),
+    checkMarkdownRepresentation(origin),
     checkHomepage(origin),
   ])
 
@@ -271,6 +330,7 @@ export async function GET(request: NextRequest) {
     sitemap,
     knowledgeHub,
     ...homepageChecks,
+    markdownRepr,
     apiAccess,
   ]
 
