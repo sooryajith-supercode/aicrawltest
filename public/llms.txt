@@ -13,6 +13,9 @@
 - [robots.txt for AI Crawlers: A Complete 2025 Guide](/blog/robots-txt-ai-crawlers.md): How to configure robots.txt for AI bots — covers GPTBot, ClaudeBot, anthropic-ai, PerplexityBot, and best practices for AI-friendly crawler configuration.
 - [JSON-LD and Structured Data: Making Your Content AI-Readable](/blog/json-ld-structured-data.md): Practical guide to implementing JSON-LD schema markup to improve visibility in AI search engines and knowledge graphs.
 - [The Complete Guide to AI Crawlability in 2025](/blog/ai-crawlability-guide-2025.md): Comprehensive checklist covering every layer of AI crawlability: robots.txt, sitemap.xml, llms.txt, Open Graph, JSON-LD, and per-page markdown.
+- [Link Response Headers for Agent Discovery — RFC 8288 Explained](/blog/link-headers-agent-discovery.md): How HTTP Link headers let AI agents discover key resources without parsing HTML, with implementation examples for Next.js and nginx.
+- [MCP Server Cards: How AI Agents Discover Your Site's Tools](/blog/mcp-server-card.md): What the MCP server card is, why /.well-known/mcp.json matters, and how to publish one so agents can discover and use your site's tools.
+- [API, OAuth, and OIDC Discovery for AI Agents](/blog/api-oauth-agent-discovery.md): How AI agents discover API capabilities and authentication requirements — covering OpenAPI, ai-plugin.json, OAuth AS metadata (RFC 8414), and OIDC discovery.
 
 ## API
 

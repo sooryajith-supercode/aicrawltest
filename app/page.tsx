@@ -4,277 +4,34 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Loader2, CheckCircle2, XCircle } from "lucide-react"
+import { Search, Loader2 } from "lucide-react"
 import { BLOG_POSTS } from "@/lib/blog"
 import { getSupabase } from "@/lib/supabase"
-
-interface FileCheckResult {
-  found: boolean
-  url: string
-}
-
-interface RobotsDirectives {
-  userAgentStar: boolean
-  hasDisallow: boolean
-  hasAllow: boolean
-  hasSitemap: boolean
-}
-
-interface RobotsTxtResult extends FileCheckResult {
-  directives: RobotsDirectives | null
-}
-
-interface PageMarkdownEntry {
-  url: string
-  markdownUrl: string
-  found: boolean
-}
-
-interface PageMarkdownResult {
-  checked: number
-  found: number
-  pages: PageMarkdownEntry[]
-}
-
-interface CheckFilesResponse {
-  llmsTxt: FileCheckResult
-  robotsTxt: RobotsTxtResult
-  sitemapXml: FileCheckResult
-  pageMarkdown: PageMarkdownResult
-}
+import { CrawlResults } from "@/components/CrawlResults"
+import { buildCrawlReport } from "@/lib/crawl-data"
+import type { CrawlReport, CheckResult } from "@/lib/crawl-data"
 
 const FEATURES = [
-  { icon: "📄", title: "llms.txt", desc: "Checks for the emerging AI-readable site manifest that tells LLMs how to interact with the site.", live: true },
-  { icon: "🤖", title: "Robots.txt", desc: "Verifies robots.txt exists so AI crawlers know how to interact with the site.", live: true },
-  { icon: "🗺️", title: "Sitemap.xml", desc: "Checks for a sitemap across common paths and via any Sitemap: directives declared in robots.txt.", live: true },
-  { icon: "📝", title: "Per-page markdown", desc: "Fetches your homepage and one other page and checks for a <link type=\"text/markdown\"> tag declaring the Markdown version.", live: true },
+  { icon: "🤖", title: "AI discovery", desc: "Checks llms.txt, robots.txt, sitemap.xml, and per-page markdown so AI crawlers can find and access your content.", live: true },
+  { icon: "📊", title: "Structured data & SEO", desc: "Verifies JSON-LD schema markup, Open Graph tags, meta titles, and canonical URLs across all pages.", live: true },
+  { icon: "⚡", title: "Performance & structure", desc: "Measures server response time, compression, HTML heading structure, and internal linking.", live: true },
+  { icon: "🏛️", title: "Authority & expertise", desc: "Checks Organization schema, social links, author signals, about page, and reputation indicators.", live: true },
 ]
 
-function ResultCard({ label, icon, result }: { label: string; icon: string; result: FileCheckResult }) {
-  return (
-    <div
-      className="rounded-[8px] p-5 flex items-start gap-4"
-      style={{
-        backgroundColor: "#faf9f5",
-        border: `1px solid ${result.found ? "rgba(58,124,82,0.25)" : "rgba(181,51,51,0.25)"}`,
-        boxShadow: "rgba(0,0,0,0.04) 0px 4px 24px",
-      }}
-    >
-      <span className="text-2xl mt-0.5">{icon}</span>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span
-            className="font-medium"
-            style={{ fontFamily: "Georgia, serif", fontSize: "1rem", color: "#141413" }}
-          >
-            {label}
-          </span>
-          {result.found ? (
-            <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#3a7c52" }} />
-          ) : (
-            <XCircle className="h-4 w-4 shrink-0" style={{ color: "#b53333" }} />
-          )}
-        </div>
-        <p className="text-sm break-all" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
-          {result.found ? (
-            <>
-              <span style={{ color: "#3a7c52", fontWeight: 500 }}>Found</span> at{" "}
-              <a
-                href={result.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2"
-                style={{ color: "#c96442" }}
-              >
-                {result.url}
-              </a>
-            </>
-          ) : (
-            <>
-              <span style={{ color: "#b53333", fontWeight: 500 }}>Not found</span> — checked{" "}
-              <span style={{ color: "#87867f" }}>{result.url}</span>
-            </>
-          )}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-function DirectiveRow({ label, present }: { label: string; present: boolean }) {
-  return (
-    <div className="flex items-center gap-2">
-      {present ? (
-        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: "#3a7c52" }} />
-      ) : (
-        <XCircle className="h-3.5 w-3.5 shrink-0" style={{ color: "#b53333" }} />
-      )}
-      <code
-        className="text-xs"
-        style={{ color: present ? "#3a7c52" : "#b53333", fontWeight: present ? 500 : 400 }}
-      >
-        {label}
-      </code>
-      {!present && (
-        <span className="text-xs" style={{ color: "#87867f" }}>missing</span>
-      )}
-    </div>
-  )
-}
-
-function MarkdownCard({ result }: { result: PageMarkdownResult }) {
-  const allFound = result.found === result.checked
-  const noneFound = result.found === 0
-  const borderColor = allFound
-    ? "rgba(58,124,82,0.25)"
-    : noneFound
-    ? "rgba(181,51,51,0.25)"
-    : "rgba(201,100,66,0.25)"
-  const statusColor = allFound ? "#3a7c52" : noneFound ? "#b53333" : "#c96442"
-  const statusText = allFound
-    ? "All pages have markdown"
-    : noneFound
-    ? "No markdown files found"
-    : `${result.found} of ${result.checked} pages have markdown`
-
-  return (
-    <div
-      className="rounded-[8px] p-5 flex items-start gap-4"
-      style={{
-        backgroundColor: "#faf9f5",
-        border: `1px solid ${borderColor}`,
-        boxShadow: "rgba(0,0,0,0.04) 0px 4px 24px",
-      }}
-    >
-      <span className="text-2xl mt-0.5">📝</span>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span
-            className="font-medium"
-            style={{ fontFamily: "Georgia, serif", fontSize: "1rem", color: "#141413" }}
-          >
-            Per-page markdown (.md)
-          </span>
-          {allFound ? (
-            <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#3a7c52" }} />
-          ) : (
-            <XCircle className="h-4 w-4 shrink-0" style={{ color: noneFound ? "#b53333" : "#c96442" }} />
-          )}
-        </div>
-        <p className="text-sm mb-3" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
-          <span style={{ color: statusColor, fontWeight: 500 }}>{statusText}</span>
-          {" "}— checked {result.checked} {result.checked === 1 ? "page" : "pages"} for{" "}
-          <code style={{ color: "#87867f", fontSize: "0.8rem" }}>{"<link type=\"text/markdown\">"}</code>
-        </p>
-        {result.pages.length > 0 && (
-          <div
-            className="rounded-[6px] p-3 flex flex-col gap-1.5"
-            style={{ backgroundColor: "#f0eee6", border: "1px solid #e8e5da" }}
-          >
-            <p className="text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: "#87867f" }}>
-              Pages checked
-            </p>
-            {result.pages.map((page) => (
-              <div key={page.url} className="flex items-start gap-2">
-                {page.found ? (
-                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: "#3a7c52" }} />
-                ) : (
-                  <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: "#b53333" }} />
-                )}
-                <div className="min-w-0">
-                  <p className="text-xs break-all" style={{ color: "#87867f" }}>
-                    {page.url.replace(/^https?:\/\/[^/]+/, "") || "/"}
-                  </p>
-                  <p className="text-[11px] break-all" style={{ color: page.found ? "#3a7c52" : "#b53333" }}>
-                    {page.found
-                      ? `link tag found → ${page.markdownUrl}`
-                      : "no <link type=\"text/markdown\"> found"}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        {noneFound && (
-          <p className="text-xs mt-2" style={{ color: "#87867f", lineHeight: 1.5 }}>
-            Add <code style={{ color: "#c96442" }}>{"<link rel=\"alternate\" type=\"text/markdown\" href=\"/page.md\">"}</code> to each page&apos;s <code style={{ color: "#c96442" }}>&lt;head&gt;</code> so AI agents can discover the clean Markdown version.
-          </p>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function RobotsCard({ result }: { result: RobotsTxtResult }) {
-  return (
-    <div
-      className="rounded-[8px] p-5 flex items-start gap-4"
-      style={{
-        backgroundColor: "#faf9f5",
-        border: `1px solid ${result.found ? "rgba(58,124,82,0.25)" : "rgba(181,51,51,0.25)"}`,
-        boxShadow: "rgba(0,0,0,0.04) 0px 4px 24px",
-      }}
-    >
-      <span className="text-2xl mt-0.5">🤖</span>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span
-            className="font-medium"
-            style={{ fontFamily: "Georgia, serif", fontSize: "1rem", color: "#141413" }}
-          >
-            robots.txt
-          </span>
-          {result.found ? (
-            <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#3a7c52" }} />
-          ) : (
-            <XCircle className="h-4 w-4 shrink-0" style={{ color: "#b53333" }} />
-          )}
-        </div>
-        <p className="text-sm break-all mb-3" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
-          {result.found ? (
-            <>
-              <span style={{ color: "#3a7c52", fontWeight: 500 }}>Found</span> at{" "}
-              <a
-                href={result.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2"
-                style={{ color: "#c96442" }}
-              >
-                {result.url}
-              </a>
-            </>
-          ) : (
-            <>
-              <span style={{ color: "#b53333", fontWeight: 500 }}>Not found</span> — checked{" "}
-              <span style={{ color: "#87867f" }}>{result.url}</span>
-            </>
-          )}
-        </p>
-        {result.found && result.directives && (
-          <div
-            className="rounded-[6px] p-3 flex flex-col gap-1.5"
-            style={{ backgroundColor: "#f0eee6", border: "1px solid #e8e5da" }}
-          >
-            <p className="text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: "#87867f" }}>
-              Directives
-            </p>
-            <DirectiveRow label="User-agent: *" present={result.directives.userAgentStar} />
-            <DirectiveRow label="Disallow:" present={result.directives.hasDisallow} />
-            <DirectiveRow label="Allow:" present={result.directives.hasAllow} />
-            <DirectiveRow label="Sitemap:" present={result.directives.hasSitemap} />
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+const PREVIEW_COUNT = 4
 
 export default function Home() {
   const [url, setUrl] = useState("")
-  const [results, setResults] = useState<CheckFilesResponse | null>(null)
+  const [results, setResults] = useState<CrawlReport | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  // Gate state
+  const [gateUnlocked, setGateUnlocked] = useState(false)
+  const [gateName, setGateName] = useState("")
+  const [gateEmail, setGateEmail] = useState("")
+  const [gateLoading, setGateLoading] = useState(false)
+  const [gateError, setGateError] = useState("")
 
   function isValidUrl(value: string) {
     try {
@@ -294,14 +51,15 @@ export default function Home() {
     setError("")
     setLoading(true)
     setResults(null)
+    setGateUnlocked(false)
 
     const normalized = trimmed.startsWith("http") ? trimmed : `https://${trimmed}`
 
     try {
-      const res = await fetch(`/api/check-files?url=${encodeURIComponent(normalized)}`)
+      const res = await fetch(`/api/check-site?url=${encodeURIComponent(normalized)}`)
       if (!res.ok) throw new Error("API error")
-      const data: CheckFilesResponse = await res.json()
-      setResults(data)
+      const data: { checks: CheckResult[] } = await res.json()
+      setResults(buildCrawlReport(normalized, data.checks))
       await getSupabase()?.from("scanned_urls").insert({ url: normalized })
     } catch {
       setError("Something went wrong. Please try again.")
@@ -310,7 +68,26 @@ export default function Home() {
     }
   }
 
-  const examples = ["anthropic.com", "openai.com", "github.com", "example.com"]
+  async function handleGateSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const name = gateName.trim()
+    const email = gateEmail.trim()
+    if (!name) { setGateError("Please enter your name"); return }
+    if (!email || !/\S+@\S+\.\S+/.test(email)) { setGateError("Please enter a valid email"); return }
+
+    setGateLoading(true)
+    setGateError("")
+
+    try {
+      const normalized = url.startsWith("http") ? url : `https://${url}`
+      await getSupabase()?.from("scanned_urls").insert({ name, email, url: normalized })
+    } catch {
+      // Don't block unlock on DB error
+    } finally {
+      setGateLoading(false)
+      setGateUnlocked(true)
+    }
+  }
 
   return (
     <div style={{ backgroundColor: "#f5f4ed", minHeight: "100vh" }}>
@@ -400,9 +177,9 @@ export default function Home() {
       {loading && (
         <section className="max-w-2xl mx-auto px-6 pb-16 text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: "#c96442" }} />
-          <p className="font-medium" style={{ color: "#141413" }}>Checking files…</p>
+          <p className="font-medium" style={{ color: "#141413" }}>Running full crawlability audit…</p>
           <p className="text-sm mt-1" style={{ color: "#87867f" }}>
-            Looking up llms.txt, robots.txt, sitemap.xml, and markdown link tags
+            Checking AI discovery, structured data, performance, authority, and more
           </p>
         </section>
       )}
@@ -410,16 +187,98 @@ export default function Home() {
       {/* Results */}
       {!loading && results && (
         <section className="max-w-2xl mx-auto px-6 pb-20 space-y-4">
-          <p
-            className="text-xs font-medium uppercase mb-2"
-            style={{ color: "#87867f", letterSpacing: "0.5px" }}
-          >
-            Results for {url.replace(/^https?:\/\//, "")}
-          </p>
-          <ResultCard label="llms.txt" icon="📄" result={results.llmsTxt} />
-          <RobotsCard result={results.robotsTxt} />
-          <ResultCard label="sitemap.xml" icon="🗺️" result={results.sitemapXml} />
-          <MarkdownCard result={results.pageMarkdown} />
+
+          {/* Preview: score card + first N checks */}
+          <CrawlResults report={results} previewCount={gateUnlocked ? undefined : PREVIEW_COUNT} />
+
+          {/* Gate — shown until unlocked */}
+          {!gateUnlocked && (
+            <div
+              className="rounded-[12px] p-6"
+              style={{
+                backgroundColor: "#faf9f5",
+                border: "1px solid #f0eee6",
+                boxShadow: "rgba(0,0,0,0.04) 0px 4px 24px",
+              }}
+            >
+              <div className="text-center mb-6">
+                <p
+                  className="text-xs font-medium uppercase tracking-[0.5px] mb-3"
+                  style={{ color: "#87867f" }}
+                >
+                  Full report
+                </p>
+                <h3
+                  className="mb-2"
+                  style={{
+                    fontFamily: "Georgia, serif",
+                    fontWeight: 500,
+                    fontSize: "1.3rem",
+                    color: "#141413",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Unlock all {results.checks.length} checks
+                </h3>
+                <p className="text-sm max-w-sm mx-auto" style={{ color: "#5e5d59", lineHeight: 1.6 }}>
+                  Enter your name and email to see the complete analysis, every recommendation, and your full score breakdown.
+                </p>
+              </div>
+
+              <form
+                onSubmit={handleGateSubmit}
+                className="flex flex-col gap-3 max-w-sm mx-auto"
+              >
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={gateName}
+                  onChange={(e) => { setGateName(e.target.value); setGateError("") }}
+                  disabled={gateLoading}
+                  className="flex h-10 w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors"
+                  style={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e8e5da",
+                    color: "#141413",
+                  }}
+                />
+                <input
+                  type="email"
+                  placeholder="Your email"
+                  value={gateEmail}
+                  onChange={(e) => { setGateEmail(e.target.value); setGateError("") }}
+                  disabled={gateLoading}
+                  className="flex h-10 w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors"
+                  style={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e8e5da",
+                    color: "#141413",
+                  }}
+                />
+                {gateError && (
+                  <p className="text-sm" style={{ color: "#b53333" }}>{gateError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={gateLoading}
+                  className="h-10 rounded-md px-4 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ backgroundColor: "#141413", color: "#faf9f5" }}
+                >
+                  {gateLoading
+                    ? <><Loader2 className="h-4 w-4 animate-spin" />Unlocking…</>
+                    : "See full report →"
+                  }
+                </button>
+                <p
+                  className="text-[11px] text-center"
+                  style={{ color: "#b0aea5" }}
+                >
+                  No spam. Unsubscribe any time.
+                </p>
+              </form>
+            </div>
+          )}
+
         </section>
       )}
 

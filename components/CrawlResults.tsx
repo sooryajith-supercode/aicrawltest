@@ -15,6 +15,10 @@ import {
   Lock,
   ChevronDown,
   ChevronRight,
+  Shield,
+  Zap,
+  Layers,
+  Search,
 } from "lucide-react"
 
 /* ── Helpers ─────────────────────────────────────── */
@@ -61,11 +65,15 @@ function statusPill(status: CheckStatus) {
 function categoryIcon(category: string) {
   const cls = "h-4 w-4 shrink-0"
   switch (category) {
-    case "Discovery": return <Globe    className={cls} />
-    case "Content":   return <FileText className={cls} />
-    case "Metadata":  return <Tag      className={cls} />
-    case "Access":    return <Lock     className={cls} />
-    default:          return <Info     className={cls} />
+    case "Discovery":   return <Globe   className={cls} />
+    case "Content":     return <FileText className={cls} />
+    case "Metadata":    return <Tag     className={cls} />
+    case "Access":      return <Lock    className={cls} />
+    case "SEO":         return <Search  className={cls} />
+    case "Authority":   return <Shield  className={cls} />
+    case "Performance": return <Zap     className={cls} />
+    case "Structure":   return <Layers  className={cls} />
+    default:            return <Info    className={cls} />
   }
 }
 
@@ -147,8 +155,9 @@ function CheckRow({ check }: { check: CheckResult }) {
 
 /* ── Main component ──────────────────────────────── */
 
-export function CrawlResults({ report }: { report: CrawlReport }) {
-  const categories = Array.from(new Set(report.checks.map((c) => c.category)))
+export function CrawlResults({ report, previewCount }: { report: CrawlReport; previewCount?: number }) {
+  const isPreview = previewCount !== undefined
+  const categories = isPreview ? [] : Array.from(new Set(report.checks.map((c) => c.category)))
   const passCnt = report.checks.filter((c) => c.status === "pass").length
   const failCnt = report.checks.filter((c) => c.status === "fail").length
   const warnCnt = report.checks.filter((c) => c.status === "warning").length
@@ -250,8 +259,37 @@ export function CrawlResults({ report }: { report: CrawlReport }) {
         </div>
       </div>
 
-      {/* Category sections */}
-      {categories.map((cat) => {
+      {/* Preview mode: flat list of first N checks */}
+      {isPreview && (
+        <div
+          className="rounded-[8px] overflow-hidden"
+          style={{
+            backgroundColor: "#faf9f5",
+            border: "1px solid #f0eee6",
+            boxShadow: "rgba(0,0,0,0.04) 0px 4px 24px",
+          }}
+        >
+          <div className="flex items-center justify-between px-6 py-4">
+            <span
+              style={{ fontFamily: "Georgia, serif", fontWeight: 500, fontSize: "1rem", color: "#141413" }}
+            >
+              Preview — {previewCount} of {report.checks.length} checks
+            </span>
+            <span className="text-xs" style={{ color: "#87867f" }}>
+              {report.checks.slice(0, previewCount).filter((c) => c.status === "pass").length} passed
+            </span>
+          </div>
+          <Separator />
+          <div className="p-5 space-y-3">
+            {report.checks.slice(0, previewCount).map((check) => (
+              <CheckRow key={check.id} check={check} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Full mode: categorized sections */}
+      {!isPreview && categories.map((cat) => {
         const catChecks = report.checks.filter((c) => c.category === cat)
         const catPass = catChecks.filter((c) => c.status === "pass").length
         return (
@@ -267,13 +305,7 @@ export function CrawlResults({ report }: { report: CrawlReport }) {
             <div className="flex items-center justify-between px-6 py-4">
               <div className="flex items-center gap-2" style={{ color: "#141413" }}>
                 {categoryIcon(cat)}
-                <span
-                  style={{
-                    fontFamily: 'Georgia, serif',
-                    fontWeight: 500,
-                    fontSize: "1rem",
-                  }}
-                >
+                <span style={{ fontFamily: "Georgia, serif", fontWeight: 500, fontSize: "1rem" }}>
                   {cat}
                 </span>
               </div>
@@ -291,30 +323,32 @@ export function CrawlResults({ report }: { report: CrawlReport }) {
         )
       })}
 
-      {/* Dark "why it matters" card */}
-      <div
-        className="rounded-[12px] px-6 py-7"
-        style={{ backgroundColor: "#141413" }}
-      >
-        <h3
-          className="mb-3"
-          style={{
-            fontFamily: 'Georgia, serif',
-            fontWeight: 500,
-            fontSize: "1.1rem",
-            color: "#faf9f5",
-            lineHeight: 1.3,
-          }}
+      {/* Dark "why it matters" card — full mode only */}
+      {!isPreview && (
+        <div
+          className="rounded-[12px] px-6 py-7"
+          style={{ backgroundColor: "#141413" }}
         >
-          What is AI Crawlability?
-        </h3>
-        <p className="text-sm leading-relaxed" style={{ color: "#b0aea5", lineHeight: 1.6 }}>
-          AI crawlability measures how well a website can be discovered, indexed, and understood
-          by AI systems like ChatGPT, Claude, Perplexity, and AI-powered browsers. As AI becomes
-          a primary way people find information, ensuring your site is AI-friendly is critical
-          for visibility and reach.
-        </p>
-      </div>
+          <h3
+            className="mb-3"
+            style={{
+              fontFamily: "Georgia, serif",
+              fontWeight: 500,
+              fontSize: "1.1rem",
+              color: "#faf9f5",
+              lineHeight: 1.3,
+            }}
+          >
+            What is AI Crawlability?
+          </h3>
+          <p className="text-sm leading-relaxed" style={{ color: "#b0aea5", lineHeight: 1.6 }}>
+            AI crawlability measures how well a website can be discovered, indexed, and understood
+            by AI systems like ChatGPT, Claude, Perplexity, and AI-powered browsers. As AI becomes
+            a primary way people find information, ensuring your site is AI-friendly is critical
+            for visibility and reach.
+          </p>
+        </div>
+      )}
 
     </div>
   )

@@ -1197,6 +1197,532 @@ export async function generateMetadata({ params }: Props) {
       },
     ],
   },
+  {
+    slug: "link-headers-agent-discovery",
+    title: "Link Response Headers for Agent Discovery — RFC 8288 Explained",
+    description:
+      "How HTTP Link headers (RFC 8288) let AI agents discover your site's key resources without parsing HTML — and how to add them to your site in minutes.",
+    publishedAt: "2026-05-14",
+    author: "Soorya",
+    category: "Technical",
+    tags: ["RFC 8288", "Link headers", "HTTP headers", "agent discovery", "AI agents", "web standards"],
+    readingTimeMinutes: 6,
+    sections: [
+      {
+        type: "p",
+        content:
+          "HTML developers know the <code>&lt;link&gt;</code> tag. What many don't know is that the same relationship information can be declared directly in the HTTP response header — before any HTML is downloaded. These are <strong>HTTP Link headers</strong>, standardised in <a href='https://www.rfc-editor.org/rfc/rfc8288' target='_blank' rel='noopener noreferrer'>RFC 8288</a>. For AI agents, they are one of the fastest and most reliable ways to discover what a website offers.",
+      },
+      {
+        type: "h2",
+        content: "What Are HTTP Link Headers?",
+      },
+      {
+        type: "p",
+        content:
+          "An HTTP <code>Link</code> header is returned as part of the server response alongside status codes and content-type. It looks like this:",
+      },
+      {
+        type: "code",
+        language: "http",
+        content: `HTTP/1.1 200 OK
+Content-Type: text/html
+Link: </llms.txt>; rel="ai-manifest"
+Link: </openapi.json>; rel="service-desc"
+Link: </about.md>; rel="alternate"; type="text/markdown"`,
+      },
+      {
+        type: "p",
+        content:
+          "An agent can issue a <code>HEAD</code> request — which returns headers but no body — and immediately know where your OpenAPI spec lives, that a Markdown version of the page exists, and where your AI manifest is. No HTML parsing, no JavaScript execution, no waiting for the full page to load.",
+      },
+      {
+        type: "h2",
+        content: "Key rel Values for AI Agent Discovery",
+      },
+      {
+        type: "p",
+        content:
+          "The <code>rel</code> attribute on a Link header defines the relationship between the current resource and the linked one. Several rel values are directly useful for AI and agent discovery:",
+      },
+      {
+        type: "ul",
+        items: [
+          "<code>rel=\"service-desc\"</code> — Points to an OpenAPI or service description document. Defined in RFC 8631. This is how an agent discovers your API contract.",
+          "<code>rel=\"describedby\"</code> — Points to documentation, a schema, or any resource that describes the current page. Broad but widely supported.",
+          "<code>rel=\"alternate\" type=\"text/markdown\"</code> — Declares a Markdown version of the current page, enabling AI agents to retrieve clean, distraction-free content.",
+          "<code>rel=\"hub\"</code> — Points to a WebSub hub for real-time update subscriptions. Useful for agents that need to stay current with your content.",
+          "<code>rel=\"ai-manifest\"</code> — An emerging informal convention pointing to your <code>llms.txt</code> or equivalent AI site manifest.",
+          "<code>rel=\"canonical\"</code> — Helps AI agents resolve duplicate content to the authoritative URL — critical for consistent indexing.",
+          "<code>rel=\"mcp\"</code> — Points to an MCP server card, enabling tool discovery for agents that support the Model Context Protocol.",
+        ],
+      },
+      {
+        type: "h2",
+        content: "Why Agents Prefer Headers Over HTML",
+      },
+      {
+        type: "p",
+        content:
+          "AI crawlers operate under tight constraints: limited context windows, API rate limits, and cost per token. When an agent can learn everything it needs from response headers alone, it saves a full page fetch. For sites with thousands of pages, this difference compounds quickly. It also bypasses the biggest trap in modern web: JavaScript-rendered content. A Next.js, React, or Vue app may return a nearly empty HTML shell before hydration — but the Link header is always there.",
+      },
+      {
+        type: "callout",
+        content:
+          "<strong>Key insight:</strong> HTTP Link headers work even for JavaScript-rendered SPAs. An agent doesn't need to execute your JavaScript to read the <code>Link</code> header — it's part of the raw HTTP response.",
+      },
+      {
+        type: "h2",
+        content: "Implementing Link Headers on Your Site",
+      },
+      {
+        type: "p",
+        content:
+          "Adding Link headers is a few lines of configuration. Here's how to do it across common platforms:",
+      },
+      {
+        type: "h3",
+        content: "Next.js (app router)",
+      },
+      {
+        type: "code",
+        language: "typescript",
+        content: `// next.config.ts
+const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Link",
+            value: [
+              '</llms.txt>; rel="ai-manifest"',
+              '</openapi.json>; rel="service-desc"',
+            ].join(", "),
+          },
+        ],
+      },
+      {
+        source: "/blog/:slug",
+        headers: [
+          {
+            key: "Link",
+            value: '</blog/:slug.md>; rel="alternate"; type="text/markdown"',
+          },
+        ],
+      },
+    ]
+  },
+}
+export default nextConfig`,
+      },
+      {
+        type: "h3",
+        content: "nginx",
+      },
+      {
+        type: "code",
+        language: "nginx",
+        content: `server {
+  add_header Link '</llms.txt>; rel="ai-manifest"' always;
+  add_header Link '</openapi.json>; rel="service-desc"' always;
+
+  location ~ ^/blog/(.+)$ {
+    add_header Link '</blog/$1.md>; rel="alternate"; type="text/markdown"' always;
+  }
+}`,
+      },
+      {
+        type: "h2",
+        content: "Link Headers vs. HTML Link Tags",
+      },
+      {
+        type: "p",
+        content:
+          "Both approaches carry the same information, and both have value. The HTML <code>&lt;link&gt;</code> tag in <code>&lt;head&gt;</code> is discoverable by browsers and crawlers that do parse HTML. The HTTP header is discoverable by <em>anything</em> making HTTP requests — including agents that never touch the DOM. Use both where possible: the HTTP header for universal machine discoverability, and the HTML tag for browser-level tooling and SEO crawlers that look for it in markup.",
+      },
+      {
+        type: "callout",
+        content:
+          "<strong>Best practice:</strong> Declare at minimum <code>rel=\"service-desc\"</code> pointing to your OpenAPI spec (if you have one) and <code>rel=\"ai-manifest\"</code> pointing to your <code>llms.txt</code> on every page. These two links give an agent an immediate map of your site's capabilities and content.",
+      },
+    ],
+  },
+  {
+    slug: "mcp-server-card",
+    title: "MCP Server Cards: How AI Agents Discover Your Site's Tools",
+    description:
+      "What the Model Context Protocol server card is, why /.well-known/mcp.json matters, and how to publish one so AI agents can discover and use your site's tools and data.",
+    publishedAt: "2026-05-14",
+    author: "Soorya",
+    category: "Technical",
+    tags: ["MCP", "Model Context Protocol", "MCP server card", "AI agents", "tool discovery", "agentic web"],
+    readingTimeMinutes: 7,
+    sections: [
+      {
+        type: "p",
+        content:
+          "The web has layers of discovery standards built up over two decades — robots.txt, sitemaps, Open Graph, JSON-LD. Now a new layer is forming for a new kind of visitor: AI agents that don't just read content but take actions. The <strong>MCP Server Card</strong> is how those agents discover what your site can do.",
+      },
+      {
+        type: "h2",
+        content: "What Is the Model Context Protocol?",
+      },
+      {
+        type: "p",
+        content:
+          "The <strong>Model Context Protocol (MCP)</strong> is an open standard developed by Anthropic that defines how AI models connect to external tools, data sources, and services. Think of it as USB-C for AI: a single standard interface that lets any agent connect to any tool without custom integration code for each pair. An AI agent supporting MCP can call search tools, read databases, execute code, post to APIs — anything — as long as the tool exposes an MCP-compliant server.",
+      },
+      {
+        type: "h2",
+        content: "What Is an MCP Server Card?",
+      },
+      {
+        type: "p",
+        content:
+          "Before an agent can use your MCP server, it needs to discover it and understand what it offers. The MCP Server Card is a JSON document published at <code>/.well-known/mcp.json</code> that answers these questions: <em>What is this server? What can it do? How does an agent authenticate? What endpoint should it connect to?</em>",
+      },
+      {
+        type: "p",
+        content:
+          "Following <a href='https://www.rfc-editor.org/rfc/rfc8615' target='_blank' rel='noopener noreferrer'>RFC 8615</a>, the <code>.well-known</code> directory is the standard location for machine-readable metadata files. By placing the server card here, any agent that knows the domain can discover MCP capabilities with a single predictable request.",
+      },
+      {
+        type: "h2",
+        content: "Structure of an MCP Server Card",
+      },
+      {
+        type: "p",
+        content:
+          "A minimal but complete server card looks like this:",
+      },
+      {
+        type: "code",
+        language: "json",
+        content: `{
+  "name": "Acme Docs MCP",
+  "description": "Access Acme product documentation, search articles, and fetch page content.",
+  "version": "1.0.0",
+  "endpoint": "https://acme.com/mcp",
+  "protocol": "mcp",
+  "protocolVersion": "2024-11-05",
+  "auth": {
+    "type": "oauth2",
+    "authorizationUrl": "https://acme.com/oauth/authorize",
+    "tokenUrl": "https://acme.com/oauth/token",
+    "scopes": ["docs:read"]
+  },
+  "tools": [
+    {
+      "name": "search_docs",
+      "description": "Search the Acme documentation by keyword",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Search query" }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "get_page",
+      "description": "Fetch the full content of a documentation page by URL",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "description": "Page URL" }
+        },
+        "required": ["url"]
+      }
+    }
+  ]
+}`,
+      },
+      {
+        type: "h2",
+        content: "Key Fields Explained",
+      },
+      {
+        type: "ul",
+        items: [
+          "<strong>endpoint</strong> — The URL where the live MCP server accepts connections. Agents send JSON-RPC requests here.",
+          "<strong>protocolVersion</strong> — The MCP spec version your server implements. Agents use this to determine compatibility.",
+          "<strong>auth</strong> — How the agent should authenticate. Can be <code>none</code>, <code>apikey</code>, or <code>oauth2</code>. For OAuth2, links to your token endpoint.",
+          "<strong>tools</strong> — An array of tool definitions with name, description, and JSON Schema input. This is what agents read to know what they can do.",
+          "<strong>resources</strong> (optional) — Data sources the agent can read, separate from callable tools.",
+        ],
+      },
+      {
+        type: "h2",
+        content: "How Agents Use the Server Card",
+      },
+      {
+        type: "p",
+        content:
+          "The discovery flow is straightforward: an agent that knows about your domain fetches <code>/.well-known/mcp.json</code>, reads the tool definitions, authenticates if required, and connects to the endpoint. From that point it can call any declared tool. No custom plugin code, no manual API key configuration — the entire handshake is automated from the server card.",
+      },
+      {
+        type: "p",
+        content:
+          "This matters for search and citation too. AI-powered search engines like Perplexity increasingly understand MCP, and a published server card signals that your site is designed for agentic interaction — not just passive reading.",
+      },
+      {
+        type: "h2",
+        content: "What Tools Should You Expose?",
+      },
+      {
+        type: "ul",
+        items: [
+          "<strong>search</strong> — Let agents query your content by keyword or topic",
+          "<strong>get_page / fetch_content</strong> — Return the full text of a specific page",
+          "<strong>list_products / list_articles</strong> — Let agents enumerate your catalogue or content inventory",
+          "<strong>get_pricing / get_availability</strong> — Structured data tools for e-commerce use cases",
+          "<strong>create_ticket / submit_form</strong> — Action tools for service-desk or lead-gen workflows",
+        ],
+      },
+      {
+        type: "callout",
+        content:
+          "<strong>Start simple:</strong> Even a server card with a single <code>search</code> tool and no authentication makes your site meaningfully more useful to AI agents than a site with no card at all. You can expand the tool list over time as demand develops.",
+      },
+      {
+        type: "h2",
+        content: "Announcing Your MCP Server via Link Header",
+      },
+      {
+        type: "p",
+        content:
+          "Publishing the file at <code>/.well-known/mcp.json</code> is the primary discovery method, but you can also advertise it via an HTTP Link header for agents that check headers before probing <code>.well-known</code>:",
+      },
+      {
+        type: "code",
+        language: "http",
+        content: `Link: </.well-known/mcp.json>; rel="mcp-server-card"`,
+      },
+      {
+        type: "p",
+        content:
+          "Adding this header to your site's responses means any agent that inspects the HTTP headers — even before navigating to any page — can discover that an MCP server exists.",
+      },
+    ],
+  },
+  {
+    slug: "api-oauth-agent-discovery",
+    title: "API, OAuth, and OIDC Discovery for AI Agents: A Practical Guide",
+    description:
+      "How AI agents discover your API capabilities and authentication requirements — covering OpenAPI specs, ai-plugin.json, OAuth authorization server metadata (RFC 8414), and OIDC discovery.",
+    publishedAt: "2026-05-14",
+    author: "Soorya",
+    category: "Technical",
+    tags: ["OpenAPI", "OAuth", "OIDC", "ai-plugin.json", "API discovery", "RFC 8414", "AI agents", "authentication"],
+    readingTimeMinutes: 8,
+    sections: [
+      {
+        type: "p",
+        content:
+          "Modern AI agents do more than read web pages — they authenticate with services, call APIs, and take actions on behalf of users. For this to work reliably at scale, agents need to <em>discover</em> what your API can do and how to authenticate with it, without requiring a human to configure each connection manually. This guide covers the four standards that make that automatic discovery possible.",
+      },
+      {
+        type: "h2",
+        content: "OpenAPI: Your API's Machine-Readable Contract",
+      },
+      {
+        type: "p",
+        content:
+          "The <strong>OpenAPI Specification</strong> (formerly Swagger) is a JSON or YAML document that fully describes a REST API — its endpoints, request parameters, response shapes, and authentication methods. When published at a predictable URL like <code>/openapi.json</code> and declared via a Link header (<code>rel=\"service-desc\"</code>), it becomes the primary way AI agents learn what your API can do.",
+      },
+      {
+        type: "p",
+        content:
+          "A minimal OpenAPI document that an agent can act on looks like this:",
+      },
+      {
+        type: "code",
+        language: "json",
+        content: `{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Acme Search API",
+    "version": "1.0.0",
+    "description": "Search Acme's product catalogue and documentation."
+  },
+  "servers": [{ "url": "https://api.acme.com/v1" }],
+  "paths": {
+    "/search": {
+      "get": {
+        "operationId": "searchCatalogue",
+        "summary": "Search the product catalogue",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Search query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SearchResults" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}`,
+      },
+      {
+        type: "p",
+        content:
+          "The <code>operationId</code> field is particularly important for agents — it is used as the function name when the LLM decides which API call to make. Keep it descriptive and unique.",
+      },
+      {
+        type: "h2",
+        content: "ai-plugin.json — The ChatGPT Plugin Format",
+      },
+      {
+        type: "p",
+        content:
+          "OpenAI's ChatGPT plugin specification introduced <code>/.well-known/ai-plugin.json</code> as a higher-level wrapper around an OpenAPI spec. While ChatGPT plugins as a product have evolved, the manifest format has been adopted broadly and is now used as a general AI agent discovery file:",
+      },
+      {
+        type: "code",
+        language: "json",
+        content: `{
+  "schema_version": "v1",
+  "name_for_human": "Acme Search",
+  "name_for_model": "acme_search",
+  "description_for_human": "Search Acme products and documentation.",
+  "description_for_model": "Use this to search Acme's product catalogue and knowledge base. Useful when the user asks about Acme products, pricing, or support topics.",
+  "auth": { "type": "none" },
+  "api": {
+    "type": "openapi",
+    "url": "https://acme.com/openapi.json"
+  },
+  "logo_url": "https://acme.com/logo.png",
+  "contact_email": "api@acme.com",
+  "legal_info_url": "https://acme.com/terms"
+}`,
+      },
+      {
+        type: "p",
+        content:
+          "The <code>description_for_model</code> field is critical — it tells the AI agent <em>when</em> to use your API and what kinds of queries it is suited for. A well-written description dramatically increases the chances of an agent choosing your tool over alternatives.",
+      },
+      {
+        type: "h2",
+        content: "OAuth Authorization Server Metadata — RFC 8414",
+      },
+      {
+        type: "p",
+        content:
+          "When your API requires OAuth authentication, agents need to know where to get tokens. <a href='https://www.rfc-editor.org/rfc/rfc8414' target='_blank' rel='noopener noreferrer'>RFC 8414</a> defines a JSON metadata document that authorization servers publish at <code>/.well-known/oauth-authorization-server</code>. An agent fetches this and immediately has everything it needs to complete an OAuth flow:",
+      },
+      {
+        type: "code",
+        language: "json",
+        content: `{
+  "issuer": "https://auth.acme.com",
+  "authorization_endpoint": "https://auth.acme.com/oauth/authorize",
+  "token_endpoint": "https://auth.acme.com/oauth/token",
+  "jwks_uri": "https://auth.acme.com/.well-known/jwks.json",
+  "scopes_supported": ["read", "write", "admin"],
+  "response_types_supported": ["code"],
+  "grant_types_supported": ["authorization_code", "client_credentials"],
+  "code_challenge_methods_supported": ["S256"]
+}`,
+      },
+      {
+        type: "p",
+        content:
+          "Without this metadata document, agents must be hard-coded with your token endpoint URL — a fragile approach that breaks when you change providers or URLs. With it, the entire auth configuration is self-describing and discoverable.",
+      },
+      {
+        type: "h2",
+        content: "OIDC Discovery — OpenID Connect Provider Metadata",
+      },
+      {
+        type: "p",
+        content:
+          "OpenID Connect (OIDC) extends OAuth 2.0 with an identity layer. For services that use OIDC for user authentication, the provider publishes a discovery document at <code>/.well-known/openid-configuration</code>. This is a superset of the OAuth AS metadata and adds OIDC-specific fields:",
+      },
+      {
+        type: "code",
+        language: "json",
+        content: `{
+  "issuer": "https://auth.acme.com",
+  "authorization_endpoint": "https://auth.acme.com/oauth/authorize",
+  "token_endpoint": "https://auth.acme.com/oauth/token",
+  "userinfo_endpoint": "https://auth.acme.com/userinfo",
+  "jwks_uri": "https://auth.acme.com/.well-known/jwks.json",
+  "id_token_signing_alg_values_supported": ["RS256"],
+  "subject_types_supported": ["public"],
+  "claims_supported": ["sub", "email", "name", "picture"]
+}`,
+      },
+      {
+        type: "p",
+        content:
+          "Any standards-compliant OIDC library or AI agent can auto-configure an authentication flow from this document. If you are using a hosted identity provider (Auth0, Okta, Supabase Auth, Clerk), this document is almost certainly already published — check your provider's documentation for the URL.",
+      },
+      {
+        type: "h2",
+        content: "OAuth Protected Resource Metadata — RFC 9728",
+      },
+      {
+        type: "p",
+        content:
+          "The newest piece of the puzzle is <a href='https://www.rfc-editor.org/rfc/rfc9728' target='_blank' rel='noopener noreferrer'>RFC 9728</a>, which defines metadata published by the <em>resource server</em> (your API) rather than the authorization server. At <code>/.well-known/oauth-protected-resource</code>, your API declares which authorization server an agent should use to obtain a token:",
+      },
+      {
+        type: "code",
+        language: "json",
+        content: `{
+  "resource": "https://api.acme.com",
+  "authorization_servers": ["https://auth.acme.com"],
+  "scopes_supported": ["read", "write"],
+  "bearer_methods_supported": ["header"]
+}`,
+      },
+      {
+        type: "p",
+        content:
+          "This solves a bootstrapping problem: an agent might know about your API endpoint but not know which authorization server issues tokens for it. The protected resource metadata provides that link, completing the chain from API discovery to authenticated access.",
+      },
+      {
+        type: "h2",
+        content: "The Full Agentic Discovery Chain",
+      },
+      {
+        type: "p",
+        content:
+          "These standards fit together into a predictable flow that a well-configured agent can execute automatically, without human intervention:",
+      },
+      {
+        type: "ol",
+        items: [
+          "Agent makes a <code>HEAD</code> request to your domain — reads the <code>Link</code> header",
+          "Discovers <code>/openapi.json</code> via <code>rel=\"service-desc\"</code> — reads the API schema",
+          "Sees auth requirement in the OpenAPI <code>securitySchemes</code>",
+          "Fetches <code>/.well-known/oauth-protected-resource</code> to find the auth server",
+          "Fetches <code>/.well-known/oauth-authorization-server</code> (or <code>openid-configuration</code>) to get token endpoints",
+          "Completes the OAuth flow — obtains a scoped access token",
+          "Calls your API with the token — takes action on behalf of the user",
+        ],
+      },
+      {
+        type: "callout",
+        content:
+          "<strong>Where to start:</strong> If you have a public read-only API, the highest-value first step is publishing <code>/openapi.json</code> and adding a <code>Link: &lt;/openapi.json&gt;; rel=\"service-desc\"</code> header to your responses. That alone makes your API discoverable to the majority of AI agents today — no auth complexity required.",
+      },
+    ],
+  },
 ]
 
 export function getBlogPost(slug: string): BlogPost | undefined {
