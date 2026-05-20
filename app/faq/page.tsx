@@ -4,13 +4,25 @@ import Link from "next/link"
 const SITE_URL = "https://aicrawltest.com"
 
 export const metadata: Metadata = {
-  title: "FAQ — AI Crawlability Questions Answered",
+  title: "FAQ — Crawlability Checker & Crawl Test Questions Answered",
   description:
-    "Frequently asked questions about AI crawlability, llms.txt, robots.txt for AI bots, structured data, and how to optimise your site for AI search engines.",
+    "Frequently asked questions about crawlability checkers, crawl tests, website crawlability testing, AI crawlers, llms.txt, robots.txt, and how to check and improve your site's crawlability.",
+  keywords: [
+    "crawlability checker FAQ",
+    "crawl test questions",
+    "check crawlability",
+    "website crawlability check",
+    "crawling test",
+    "crawler check",
+    "test website crawlability",
+    "website crawlability tester",
+    "crawlability audit",
+    "AI crawlability checker",
+  ],
   alternates: { canonical: "/faq" },
   openGraph: {
-    title: "FAQ — AI Crawlability Test",
-    description: "Answers to the most common questions about AI crawlability, llms.txt, and optimising for AI search.",
+    title: "FAQ — Crawlability Checker & Crawl Test Questions Answered",
+    description: "Answers to the most common questions about crawlability checkers, crawl tests, and optimising for AI search.",
     url: `${SITE_URL}/faq`,
     type: "website",
   },
@@ -56,6 +68,30 @@ const FAQS = [
   {
     q: "What is an MCP server card?",
     a: "An MCP (Model Context Protocol) server card is a JSON file at /.well-known/mcp.json that describes what tools or capabilities your site exposes to AI agents. It lets agents discover and use your site's functionality automatically, similar to how OpenAPI specs describe REST APIs.",
+  },
+  {
+    q: "What is a crawl test?",
+    a: "A crawl test is a live check that fetches your website the same way a search or AI crawler would, then reports what it can and cannot access. A good crawl test covers robots.txt directives, sitemap availability, page response codes, structured data, and AI-specific files like llms.txt. Our free website crawlability tester runs all of these checks in real time — no caching, no signup.",
+  },
+  {
+    q: "How do I check website crawlability?",
+    a: "To check crawlability, enter your domain into this tool and click 'Check site'. Within seconds you get a full crawlability audit across 20+ signals: AI crawler permissions, file presence, structured data, heading structure, internal linking, authority signals, and more. Each failing check comes with a specific fix recommendation.",
+  },
+  {
+    q: "What does a crawlability checker test?",
+    a: "A crawlability checker verifies every layer that affects whether bots can index your site. This includes: (1) robots.txt — are AI user-agents explicitly allowed? (2) sitemap.xml — is it present and linked? (3) llms.txt — does it exist and is it valid? (4) Structured data — is JSON-LD markup present? (5) Page speed and compression — does your server respond quickly? (6) Meta tags and Open Graph — are pages described correctly? Our crawlability checker tests all of these and more.",
+  },
+  {
+    q: "Is there a free online crawlability checker?",
+    a: "Yes. This tool is a completely free website crawlability checker — no account required, no payment, and no rate limit on single checks. Enter any URL to instantly run a full crawling test and get a scored report. You unlock all check details and recommendations by providing your email, which is still free.",
+  },
+  {
+    q: "What is a crawling test for AI search engines?",
+    a: "A crawling test for AI search engines goes beyond standard SEO crawl tools. It specifically verifies whether AI crawlers like GPTBot, ClaudeBot, and PerplexityBot are permitted in robots.txt, whether llms.txt is present and correctly formatted, and whether your structured data gives AI agents enough context to cite your content accurately in AI-generated answers.",
+  },
+  {
+    q: "How is a website crawl checker different from Google Search Console?",
+    a: "Google Search Console shows you historical crawl data from Googlebot only. A website crawl checker like ours runs live against your site right now and covers AI crawlers — GPTBot, ClaudeBot, PerplexityBot — in addition to traditional search bots. It also checks AI-specific files (llms.txt, per-page markdown) and signals that Google Search Console doesn't surface.",
   },
 ]
 

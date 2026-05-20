@@ -3,16 +3,29 @@ import Link from "next/link"
 import { BLOG_POSTS } from "@/lib/blog"
 
 export const metadata: Metadata = {
-  title: "Blog — Crawlability & AI SEO Guides",
+  title: "Blog — Crawlability Checker, Crawl Test & AI SEO Guides",
   description:
-    "In-depth guides on AI crawlability, llms.txt, robots.txt for AI crawlers, structured data, and optimizing your website for AI-powered search engines.",
+    "In-depth guides on crawlability checkers, crawl testing, AI crawlability, llms.txt, robots.txt for AI crawlers, structured data, and optimizing your website for AI-powered search engines.",
+  keywords: [
+    "crawlability checker guide",
+    "crawl test tutorial",
+    "website crawlability",
+    "crawling test",
+    "AI crawlability",
+    "llms.txt guide",
+    "robots.txt AI crawlers",
+    "check crawlability",
+    "test website crawlability",
+    "crawlability audit",
+    "AI SEO",
+  ],
   alternates: {
     canonical: "/blog",
   },
   openGraph: {
-    title: "Blog — Crawlability & AI SEO Guides",
+    title: "Blog — Crawlability Checker, Crawl Test & AI SEO Guides",
     description:
-      "In-depth guides on AI crawlability, llms.txt, robots.txt, structured data, and AI search engine optimization.",
+      "In-depth guides on crawlability testing, AI crawlability, llms.txt, robots.txt, structured data, and AI search engine optimization.",
     url: "https://aicrawltest.com/blog",
     type: "website",
   },

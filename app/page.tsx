@@ -339,6 +339,58 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Crawlability explainer — SEO content */}
+          <section className="max-w-2xl mx-auto px-6 pb-20">
+            <h2
+              className="mb-6"
+              style={{
+                fontFamily: "Georgia, serif",
+                fontWeight: 500,
+                fontSize: "1.3rem",
+                color: "#141413",
+                lineHeight: 1.2,
+              }}
+            >
+              What is a crawlability checker?
+            </h2>
+            <div className="flex flex-col gap-6" style={{ color: "#3d3c38", lineHeight: 1.75 }}>
+              <p>
+                A <strong>crawlability checker</strong> is a tool that runs a <strong>crawl test</strong> on your website to verify
+                whether search bots and AI crawlers can discover, access, and understand your content. When you{" "}
+                <strong>check crawlability</strong>, the tool fetches your site exactly as a crawler would and reports what it finds —
+                including missing files, blocked paths, and misconfigured directives.
+              </p>
+              <p>
+                This free <strong>website crawlability tester</strong> goes beyond traditional SEO crawling. It runs a full{" "}
+                <strong>crawling test</strong> for AI-specific signals: your{" "}
+                <code style={{ fontSize: "0.875em", backgroundColor: "#f0eee6", padding: "0.1em 0.3em", borderRadius: "3px" }}>llms.txt</code>{" "}
+                file, <code style={{ fontSize: "0.875em", backgroundColor: "#f0eee6", padding: "0.1em 0.3em", borderRadius: "3px" }}>robots.txt</code> directives
+                for GPTBot and ClaudeBot, <code style={{ fontSize: "0.875em", backgroundColor: "#f0eee6", padding: "0.1em 0.3em", borderRadius: "3px" }}>sitemap.xml</code>,
+                structured data, Open Graph tags, and more.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                {[
+                  { term: "Crawl test", def: "Checks live whether AI bots can reach your pages right now." },
+                  { term: "Crawler check", def: "Verifies robots.txt permits GPTBot, ClaudeBot, and PerplexityBot." },
+                  { term: "Crawlability audit", def: "Scores your site across 20+ signals and grades it A–F." },
+                  { term: "Website crawl checker", def: "Inspects sitemap, structured data, and link depth end-to-end." },
+                ].map(({ term, def }) => (
+                  <div
+                    key={term}
+                    className="rounded-[8px] p-4"
+                    style={{ backgroundColor: "#faf9f5", border: "1px solid #f0eee6" }}
+                  >
+                    <p className="font-medium mb-1" style={{ fontFamily: "Georgia, serif", fontSize: "0.95rem", color: "#141413" }}>{term}</p>
+                    <p className="text-sm" style={{ color: "#5e5d59", lineHeight: 1.55 }}>{def}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm" style={{ color: "#5e5d59" }}>
+                To <strong>test website crawlability</strong>, enter your URL above and get a free instant report — no signup required.
+              </p>
+            </div>
+          </section>
+
           {/* Blog preview */}
           <section className="max-w-2xl mx-auto px-6 pb-20">
             <div className="flex items-center justify-between mb-8">

@@ -4,13 +4,23 @@ import Link from "next/link"
 const SITE_URL = "https://aicrawltest.com"
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "About — Free AI Crawlability Checker & Crawl Test Tool",
   description:
-    "AI Crawlability Test is a free tool that checks whether your website is ready for AI agents, crawlers, and AI-powered search engines.",
+    "AI Crawlability Test is a free crawlability checker and crawl test tool. Check whether your website is ready for AI crawlers, search bots, and AI-powered search engines — instantly, with no signup.",
+  keywords: [
+    "about crawlability checker",
+    "free crawlability checker",
+    "crawl test tool",
+    "website crawlability tester",
+    "AI crawlability checker",
+    "crawling test tool",
+    "check crawlability free",
+    "online crawl test",
+  ],
   alternates: { canonical: "/about" },
   openGraph: {
-    title: "About — AI Crawlability Test",
-    description: "Free tool to check if your website is ready for AI agents, crawlers, and AI-powered search engines.",
+    title: "About — Free AI Crawlability Checker & Crawl Test Tool",
+    description: "Free crawlability checker and crawl test tool. Check if your website is ready for AI crawlers and AI-powered search engines.",
     url: `${SITE_URL}/about`,
     type: "website",
   },

@@ -1,6 +1,6 @@
 # AI Crawlability Test
 
-> Free AI crawl test tool — check whether your website has the key files AI crawlers and agents look for: llms.txt, robots.txt, sitemap.xml, per-page markdown, and structured data.
+> Free AI crawlability checker and crawl test tool — check whether your website has the key files AI crawlers and agents look for: llms.txt, robots.txt, sitemap.xml, per-page markdown, and structured data. Use it to test website crawlability, run a crawling test, perform a crawler check, and get a full crawlability audit graded A–F.
 
 ## Tool
 
