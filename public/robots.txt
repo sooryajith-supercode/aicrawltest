@@ -31,3 +31,5 @@ Allow: /
 Disallow: /api/
 
 Sitemap: https://aicrawltest.com/sitemap.xml
+
+Feed: https://aicrawltest.com/api/feed

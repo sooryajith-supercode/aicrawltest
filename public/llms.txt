@@ -5,6 +5,9 @@
 ## Tool
 
 - [Home](/index.md): Free AI crawl test — enter a URL to instantly check whether llms.txt, robots.txt, sitemap.xml, and per-page markdown are present and properly configured.
+- [FAQ](/faq): Frequently asked questions about AI crawlability, llms.txt, robots.txt for AI bots, structured data, and how to optimise for AI search engines.
+- [About](/about): About the AI Crawlability Test tool — what it checks, why it matters, and who built it.
+- [Contact](/contact): Get in touch with questions, feedback, or partnership inquiries.
 
 ## Blog
 

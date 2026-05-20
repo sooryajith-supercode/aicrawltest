@@ -1,0 +1,162 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI Crawlability Test API",
+    "description": "Check whether any website has the key files and signals AI crawlers and agents look for.",
+    "version": "1.0.0",
+    "contact": {
+      "email": "support@supercode.in",
+      "url": "https://aicrawltest.com/contact"
+    },
+    "license": {
+      "name": "Free to use",
+      "url": "https://aicrawltest.com/privacy"
+    }
+  },
+  "servers": [
+    { "url": "https://aicrawltest.com", "description": "Production" }
+  ],
+  "paths": {
+    "/api/check-site": {
+      "get": {
+        "summary": "Full AI crawlability audit",
+        "description": "Runs 20+ checks across discovery, content, structure, metadata, performance, and authority signals. Returns a scored checklist.",
+        "operationId": "checkSite",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "The URL to audit",
+            "schema": { "type": "string", "example": "https://example.com" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "checks": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/CheckResult" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing or invalid URL parameter" }
+        }
+      }
+    },
+    "/api/check-files": {
+      "get": {
+        "summary": "Quick file check",
+        "description": "Checks for llms.txt, robots.txt, sitemap.xml, and per-page markdown link tags.",
+        "operationId": "checkFiles",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "The URL to check",
+            "schema": { "type": "string", "example": "https://example.com" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File check results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "llmsTxt": {
+                      "type": "object",
+                      "properties": {
+                        "found": { "type": "boolean" },
+                        "url": { "type": "string" }
+                      }
+                    },
+                    "robotsTxt": {
+                      "type": "object",
+                      "properties": {
+                        "found": { "type": "boolean" },
+                        "url": { "type": "string" },
+                        "directives": { "type": "object" }
+                      }
+                    },
+                    "sitemapXml": {
+                      "type": "object",
+                      "properties": {
+                        "found": { "type": "boolean" },
+                        "url": { "type": "string" }
+                      }
+                    },
+                    "pageMarkdown": {
+                      "type": "object",
+                      "properties": {
+                        "checked": { "type": "integer" },
+                        "found": { "type": "integer" },
+                        "pages": { "type": "array", "items": { "type": "object" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/check-llms": {
+      "get": {
+        "summary": "Validate llms.txt",
+        "description": "Fetches and validates the llms.txt file at the given URL against the llmstxt.org specification.",
+        "operationId": "checkLlms",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "The site URL whose llms.txt to validate",
+            "schema": { "type": "string", "example": "https://example.com" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation result",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CheckResult": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "category": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["pass", "fail", "warning", "info"]
+          },
+          "detail": { "type": "string" },
+          "recommendation": { "type": "string" },
+          "weight": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

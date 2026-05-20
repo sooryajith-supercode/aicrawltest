@@ -50,6 +50,9 @@ export const metadata: Metadata = {
   publisher: "AI Crawlability Test",
   alternates: {
     canonical: "/",
+    types: {
+      "text/markdown": "/index.md",
+    },
   },
   openGraph: {
     type: "website",
@@ -127,6 +130,17 @@ const jsonLd = {
       "@id": `${SITE_URL}/#organization`,
       name: "AI Crawlability Test",
       url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/icon.svg`,
+      },
+      sameAs: ["https://x.com/aicrawltest"],
+    },
+    {
+      "@type": "Person",
+      "@id": `${SITE_URL}/#author`,
+      name: "Soorya",
+      url: `${SITE_URL}/about`,
     },
   ],
 }

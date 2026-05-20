@@ -1,0 +1,34 @@
+{
+  "name": "AI Crawlability Test",
+  "description": "Check whether any website has the key files AI crawlers and agents look for — llms.txt, robots.txt, sitemap.xml, structured data, and more.",
+  "url": "https://aicrawltest.com",
+  "tools": [
+    {
+      "name": "check-site",
+      "description": "Run a full AI crawlability audit on any URL — tests 20+ signals across discovery, content, structure, metadata, performance, and authority.",
+      "endpoint": "/api/check-site",
+      "method": "GET",
+      "parameters": {
+        "url": { "type": "string", "description": "The URL to audit", "required": true }
+      }
+    },
+    {
+      "name": "check-files",
+      "description": "Quick check for llms.txt, robots.txt, sitemap.xml, and per-page markdown link tags.",
+      "endpoint": "/api/check-files",
+      "method": "GET",
+      "parameters": {
+        "url": { "type": "string", "description": "The URL to check", "required": true }
+      }
+    },
+    {
+      "name": "check-llms",
+      "description": "Detailed llms.txt parser — validates format, structure, and compliance with the llmstxt.org specification.",
+      "endpoint": "/api/check-llms",
+      "method": "GET",
+      "parameters": {
+        "url": { "type": "string", "description": "The URL whose llms.txt to validate", "required": true }
+      }
+    }
+  ]
+}

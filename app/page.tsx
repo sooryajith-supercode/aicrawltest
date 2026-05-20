@@ -102,7 +102,7 @@ export default function Home() {
         >
           AI Crawlability Test
         </span>
-        <div className="flex items-center gap-5">
+        <nav className="flex items-center gap-5">
           <Link
             href="/whats-new"
             className="text-sm font-medium hover-accent"
@@ -117,12 +117,17 @@ export default function Home() {
           >
             Blog
           </Link>
-          <span className="text-xs" style={{ color: "#87867f" }}>
-            v{process.env.NEXT_PUBLIC_APP_VERSION} · Live checks
-          </span>
-        </div>
+          <Link
+            href="/about"
+            className="text-sm font-medium hover-accent"
+            style={{ color: "#5e5d59", textDecoration: "none" }}
+          >
+            About
+          </Link>
+        </nav>
       </header>
 
+      <main>
       {/* Hero */}
       <section className="max-w-2xl mx-auto px-6 pt-20 pb-12 text-center">
         <p
@@ -423,17 +428,27 @@ export default function Home() {
         </>
       )}
 
+      </main>
+
       {/* Footer */}
       <footer
-        className="text-center py-8 px-6"
+        className="py-10 px-6"
         style={{ borderTop: "1px solid #f0eee6", backgroundColor: "#f5f4ed" }}
       >
-        <p className="text-xs" style={{ color: "#87867f" }}>
-          All checks are live — fetched directly from your site in real time.{" "}
-          <Link href="/changelog" className="underline underline-offset-2 hover-accent" style={{ color: "#87867f" }}>
-            Changelog
-          </Link>
-        </p>
+        <div className="max-w-2xl mx-auto">
+          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-4">
+            <Link href="/about" className="text-xs hover-accent" style={{ color: "#87867f", textDecoration: "none" }}>About</Link>
+            <Link href="/blog" className="text-xs hover-accent" style={{ color: "#87867f", textDecoration: "none" }}>Blog</Link>
+            <Link href="/faq" className="text-xs hover-accent" style={{ color: "#87867f", textDecoration: "none" }}>FAQ</Link>
+            <Link href="/contact" className="text-xs hover-accent" style={{ color: "#87867f", textDecoration: "none" }}>Contact</Link>
+            <Link href="/privacy" className="text-xs hover-accent" style={{ color: "#87867f", textDecoration: "none" }}>Privacy</Link>
+            <Link href="/changelog" className="text-xs hover-accent" style={{ color: "#87867f", textDecoration: "none" }}>Changelog</Link>
+            <a href="https://x.com/aicrawltest" rel="noopener noreferrer" className="text-xs hover-accent" style={{ color: "#87867f", textDecoration: "none" }}>X / Twitter</a>
+          </nav>
+          <p className="text-xs text-center" style={{ color: "#b0aea5" }}>
+            All checks are live — fetched directly from your site in real time.
+          </p>
+        </div>
       </footer>
     </div>
   )

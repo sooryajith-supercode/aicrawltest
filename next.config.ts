@@ -13,6 +13,23 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: `${version}-${gitHash}`,
   },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Link",
+            value: [
+              '</llms.txt>; rel="ai-manifest"',
+              '</sitemap.xml>; rel="sitemap"',
+              '</openapi.json>; rel="service-desc"',
+            ].join(", "),
+          },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig
